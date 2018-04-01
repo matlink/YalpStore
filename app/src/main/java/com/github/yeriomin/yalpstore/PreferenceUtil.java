@@ -30,6 +30,7 @@ public class PreferenceUtil {
     public static final String PREFERENCE_DOWNLOAD_DELTAS = "PREFERENCE_DOWNLOAD_DELTAS";
     public static final String PREFERENCE_AUTO_WHITELIST = "PREFERENCE_AUTO_WHITELIST";
     public static final String PREFERENCE_DOWNLOAD_INTERNAL_STORAGE = "PREFERENCE_DOWNLOAD_INTERNAL_STORAGE";
+    public static final String PREFERENCE_INCLUDE_DISABLED = "PREFERENCE_INCLUDE_DISABLED";
 
     public static final String INSTALLATION_METHOD_DEFAULT = "default";
     public static final String INSTALLATION_METHOD_ROOT = "root";

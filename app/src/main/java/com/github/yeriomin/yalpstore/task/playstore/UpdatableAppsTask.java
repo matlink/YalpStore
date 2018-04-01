@@ -74,7 +74,8 @@ public class UpdatableAppsTask extends RemoteAppListTask {
         InstalledAppsTask task = new InstalledAppsTask();
         task.setContext(context);
         task.setIncludeSystemApps(true);
-        return task.getInstalledApps(false);
+        boolean includeDisabled = PreferenceUtil.getBoolean(context, PreferenceUtil.PREFERENCE_INCLUDE_DISABLED);
+        return task.getInstalledApps(includeDisabled);
     }
 
     protected List<App> getAppsFromPlayStore(GooglePlayAPI api, Collection<String> packageNames) throws IOException {

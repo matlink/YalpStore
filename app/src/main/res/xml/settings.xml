@@ -63,6 +63,12 @@
             android:persistent="true"
             android:key="PREFERENCE_UPDATE_LIST"
             android:title="@string/pref_update_list_black" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="PREFERENCE_INCLUDE_DISABLED"
+            android:summaryOff="@string/pref_include_disabled_off"
+            android:summaryOn="@string/pref_download_include_disabled_on"
+            android:title="@string/pref_include_disabled" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_category_installation">
         <CheckBoxPreference
