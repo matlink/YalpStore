@@ -24,7 +24,7 @@ before_deploy:
 - cd app/build/outputs/apk/legacy/release/
 - jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $TRAVIS_BUILD_DIR/matlink-keystore.jks
   -storepass $SECURE_STOREPASS -keypass $SECURE_KEYPASS app-legacy-release-unsigned.apk
-  AndroidKey
+  matlink
 - jarsigner -verify app-legacy-release-unsigned.apk
 - "$ANDROID_HOME/build-tools/27.0.3/zipalign -v 4 app-legacy-release-unsigned.apk
   $APK_NAME"
