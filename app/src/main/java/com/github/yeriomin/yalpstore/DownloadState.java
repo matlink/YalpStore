@@ -1,3 +1,22 @@
+/*
+ * Yalp Store
+ * Copyright (C) 2018 Sergey Yeriomin <yeriomin@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 package com.github.yeriomin.yalpstore;
 
 import android.util.Pair;
@@ -8,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DownloadState {
 
@@ -25,13 +45,13 @@ public class DownloadState {
         CANCELLED,
     }
 
-    static private Map<String, DownloadState> state = new HashMap<>();
-    static private Map<Long, String> downloadIds = new HashMap<>();
+    static private Map<String, DownloadState> state = new ConcurrentHashMap<>();
+    static private Map<Long, String> downloadIds = new ConcurrentHashMap<>();
 
     private App app;
     private TriggeredBy triggeredBy = TriggeredBy.DOWNLOAD_BUTTON;
-    private Map<Long, Pair<Integer, Integer>> progress = new HashMap<>();
-    private Map<Long, Status> status = new HashMap<>();
+    private Map<Long, Pair<Integer, Integer>> progress = new ConcurrentHashMap<>();
+    private Map<Long, Status> status = new ConcurrentHashMap<>();
     private byte[] apkChecksum;
 
     static public DownloadState get(String packageName) {
