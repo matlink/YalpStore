@@ -20,8 +20,10 @@ install:
 before_deploy:
 - export VERSION_CODE=`echo $TRAVIS_TAG | cut -d"." -f2`
 - export APK_NAME=com.github.yeriomin.yalpstore_$VERSION_CODE.apk
+- export APK_NAME_CONTEMPORARY=com.github.yeriomin.yalpstore_contemporary_$VERSION_CODE.apk
 - export OTA_NAME=yalp-store-ota-$VERSION_CODE.zip
-- cd app/build/outputs/apk/legacy/release/
+- export GIT_DIR=$(pwd)
+- cd $GIT_DIR/app/build/outputs/apk/legacy/release/
 - jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $TRAVIS_BUILD_DIR/matlink-keystore.jks
   -storepass $SECURE_STOREPASS -keypass $SECURE_KEYPASS app-legacy-release-unsigned.apk
   matlink
@@ -30,6 +32,14 @@ before_deploy:
   $APK_NAME"
 - cp $APK_NAME $TRAVIS_BUILD_DIR/yalp-store-ota-zip/YalpStore.apk
 - cp $APK_NAME $TRAVIS_BUILD_DIR
+- cd $GIT_DIR/app/build/outputs/apk/contemporary/release/
+- jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $TRAVIS_BUILD_DIR/matlink-keystore.jks
+  -storepass $SECURE_STOREPASS -keypass $SECURE_KEYPASS app-contemporary-release-unsigned.apk
+  matlink
+- jarsigner -verify app-contemporary-release-unsigned.apk
+- "$ANDROID_HOME/build-tools/27.0.3/zipalign -v 4 app-contemporary-release-unsigned.apk
+  $APK_NAME_CONTEMPORARY"
+- cp $APK_NAME_CONTEMPORARY $TRAVIS_BUILD_DIR
 - cd $TRAVIS_BUILD_DIR/yalp-store-ota-zip
 - zip -r $TRAVIS_BUILD_DIR/$OTA_NAME *
 - cd $TRAVIS_BUILD_DIR
@@ -46,6 +56,7 @@ deploy:
   file:
     - $OTA_NAME
     - $APK_NAME
+    - $APK_NAME_CONTEMPORARY
   skip_cleanup: true
   on:
     all_branches: true
