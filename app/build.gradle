@@ -16,7 +16,7 @@ android {
         applicationId "com.github.yeriomin.yalpstore"
         minSdkVersion 5
         targetSdkVersion 27
-        versionCode 35
+        versionCode 37
         versionName getVersionName()
         vectorDrawables.useSupportLibrary = true
     }
@@ -45,8 +45,8 @@ android {
 }
 
 dependencies {
-    contemporaryImplementation 'com.android.support:design:27.1.0'
-    contemporaryImplementation 'com.android.support:appcompat-v7:27.1.0'
+    contemporaryImplementation 'com.android.support:design:27.1.1'
+    contemporaryImplementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'commons-net:commons-net:3.5'
     implementation 'com.nothome:javaxdelta:2.0.1'
     debugImplementation 'com.github.yeriomin:play-store-api:master-SNAPSHOT'

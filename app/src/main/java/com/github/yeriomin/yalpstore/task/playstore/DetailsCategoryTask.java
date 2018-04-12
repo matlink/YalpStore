@@ -17,27 +17,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.github.yeriomin.yalpstore;
+package com.github.yeriomin.yalpstore.task.playstore;
 
-import android.os.Bundle;
+import com.github.yeriomin.yalpstore.widget.Badge;
 
-import com.github.yeriomin.yalpstore.fragment.preference.AllPreferences;
+import java.lang.ref.WeakReference;
 
-public class PreferenceActivity extends android.preference.PreferenceActivity {
+public class DetailsCategoryTask extends CategoryTask {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        new ThemeManager().setTheme(this);
-        super.onCreate(savedInstanceState);
-        PreferenceUtil.putStringSet(this, PreferenceUtil.PREFERENCE_UPDATE_LIST, PreferenceUtil.getStringSet(this, PreferenceUtil.PREFERENCE_UPDATE_LIST));
-        addPreferencesFromResource(R.xml.settings);
-        new AllPreferences(this).draw();
+    private String categoryId;
+    private WeakReference<Badge> categoryViewRef = new WeakReference<>(null);
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public void setCategoryView(Badge categoryView) {
+        this.categoryViewRef = new WeakReference<>(categoryView);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (!YalpStorePermissionManager.isGranted(requestCode, permissions, grantResults)) {
-            finish();
+    protected void fill() {
+        Badge categoryView = categoryViewRef.get();
+        if (null != categoryView) {
+            categoryView.setLabel(manager.getCategoryName(categoryId));
         }
     }
 }
