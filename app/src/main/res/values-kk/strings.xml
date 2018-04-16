@@ -13,9 +13,7 @@
 <string name="action_search">"Іздеу"</string>
 <string name="action_updates">"Жаңартулар"</string>
 <string name="action_ignore">"Жаңартпау"</string>
-<string name="action_unignore">"Қайтадан жаңарту"</string>
 <string name="action_whitelist">"Жаңарту"</string>
-<string name="action_unwhitelist">"Жаңартпау"</string>
 <string name="search_title">"Бағдарламалар іздеу"</string>
 <string name="dialog_two_factor_cancel">"Кейінірек"</string>
 <string name="dialog_two_factor_create_password">"Құпиясөз құру"</string>
@@ -42,7 +40,6 @@ Play Store парақшасына өтесіз бе?"</string>
 <string name="error_downloads_directory_not_writable">"Жүктеп алу каталогы жазу үшін қол жетімді емес."</string>
 <string name="error_token_dispenser_problem">"Аккаунтсыз қосыла алмады. Google аккаунт арқылы қосылып көріңіз."</string>
 <string name="details_updated">"%1$s жаңартылды"</string>
-<string name="details_size">"%1$s apk өлшемі"</string>
 <string name="details_description">"Сипаттамасы:"</string>
 <string name="details_changelog">"Соңғы нұсқадағы өзгерістер:"</string>
 <string name="details_screenshots">"Скриншоттар:"</string>
@@ -101,7 +98,6 @@ Play Store парақшасына өтесіз бе?"</string>
 <string name="download_manager_ERROR_CANNOT_RESUME">"Желі қатесі. Кейінірек қайталап көріңіз."</string>
 <string name="download_manager_ERROR_BLOCKED">"NetworkPolicyManager қауіпсіздік параметрлері үшін жүктеу үзілді."</string>
 <string name="search_filter">"Барлық бағдарламалар"</string>
-<string name="details_category">"Санат: %1$s"</string>
 <string name="pref_delete_apk_after_install_summary_off">"Қазір .apk орнатудан кейін жойылмайды"</string>
 <string name="pref_delete_apk_after_install_summary_on">"Қазір .apk орнатудан кейін жойылады"</string>
 <string name="pref_delete_apk_after_install">"Орнатудан кейін .apk өшіру"</string>
@@ -290,4 +286,11 @@ Backup жасаңыз."</string>
 <string name="pref_download_internal_storage">"Download to internal storage"</string>
 <string name="pref_download_internal_storage_summary_on">"More secure, but the apks are not user accessible"</string>
 <string name="pref_download_internal_storage_summary_off">"Apks are downloaded to the external storage path provided below"</string>
+<string name="pref_use_tor">"Use Tor"</string>
+<string name="pref_use_tor_summary">"Force download traffic through Tor for increased privacy. Requires Orbot"</string>
+<string name="pref_category_proxy">"Proxy"</string>
+<string name="pref_proxy_enable">"Enable proxy"</string>
+<string name="pref_proxy_type">"Proxy type"</string>
+<string name="pref_proxy_host">"Proxy host"</string>
+<string name="pref_proxy_port">"Proxy port"</string>
 </resources>
