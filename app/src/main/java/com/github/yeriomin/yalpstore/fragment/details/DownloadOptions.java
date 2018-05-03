@@ -33,6 +33,7 @@ import com.github.yeriomin.yalpstore.BlackWhiteListManager;
 import com.github.yeriomin.yalpstore.BuildConfig;
 import com.github.yeriomin.yalpstore.ContextUtil;
 import com.github.yeriomin.yalpstore.InstalledApkCopier;
+import com.github.yeriomin.yalpstore.LocalWishlist;
 import com.github.yeriomin.yalpstore.ManualDownloadActivity;
 import com.github.yeriomin.yalpstore.R;
 import com.github.yeriomin.yalpstore.YalpStoreActivity;
@@ -41,6 +42,7 @@ import com.github.yeriomin.yalpstore.task.CheckShellTask;
 import com.github.yeriomin.yalpstore.task.ConvertToNormalTask;
 import com.github.yeriomin.yalpstore.task.ConvertToSystemTask;
 import com.github.yeriomin.yalpstore.task.SystemRemountTask;
+import com.github.yeriomin.yalpstore.task.playstore.WishlistToggleTask;
 import com.github.yeriomin.yalpstore.view.FlagDialogBuilder;
 
 public class DownloadOptions extends Abstract {
@@ -67,28 +69,32 @@ public class DownloadOptions extends Abstract {
     public void inflate(Menu menu) {
         MenuInflater inflater = activity.getMenuInflater();
         inflater.inflate(R.menu.menu_download, menu);
-        if (isInstalled(app)) {
-            onCreateOptionsMenu(menu);
-        }
+        onCreateOptionsMenu(menu);
     }
 
     public void onCreateOptionsMenu(Menu menu) {
+        if (!app.isInstalled()) {
+            LocalWishlist localWishlist = new LocalWishlist(activity);
+            show(menu, R.id.action_wishlist_add, !localWishlist.contains(app.getPackageName()));
+            show(menu, R.id.action_wishlist_remove, localWishlist.contains(app.getPackageName()));
+        } else {
+            BlackWhiteListManager manager = new BlackWhiteListManager(activity);
+            boolean isContained = manager.contains(app.getPackageName());
+            if (manager.isBlack()) {
+                show(menu, R.id.action_ignore, true);
+            } else {
+                show(menu, R.id.action_whitelist, true);
+            }
+            setChecked(menu, R.id.action_ignore, isContained);
+            setChecked(menu, R.id.action_whitelist, isContained);
+            if (isConvertible(app)) {
+                show(menu, R.id.action_make_system, !app.isSystem());
+                show(menu, R.id.action_make_normal, app.isSystem());
+            }
+            show(menu, R.id.action_flag, app.isInPlayStore());
+        }
         show(menu, R.id.action_manual, true);
         show(menu, R.id.action_get_local_apk, app.isInstalled());
-        BlackWhiteListManager manager = new BlackWhiteListManager(activity);
-        boolean isContained = manager.contains(app.getPackageName());
-        if (manager.isBlack()) {
-            show(menu, R.id.action_ignore, true);
-        } else {
-            show(menu, R.id.action_whitelist, true);
-        }
-        setChecked(menu, R.id.action_ignore, isContained);
-        setChecked(menu, R.id.action_whitelist, isContained);
-        if (isConvertible(app)) {
-            show(menu, R.id.action_make_system, !app.isSystem());
-            show(menu, R.id.action_make_normal, app.isSystem());
-        }
-        show(menu, R.id.action_flag, app.isInPlayStore());
     }
 
     private void setChecked(Menu menu, int itemId, boolean checked) {
@@ -131,6 +137,13 @@ public class DownloadOptions extends Abstract {
                 return true;
             case R.id.action_flag:
                 new FlagDialogBuilder().setActivity(activity).setApp(app).build().show();
+                return true;
+            case R.id.action_wishlist_add:
+            case R.id.action_wishlist_remove:
+                WishlistToggleTask task = new WishlistToggleTask();
+                task.setContext(activity);
+                task.setPackageName(app.getPackageName());
+                task.execute();
                 return true;
         }
         return false;

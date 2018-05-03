@@ -1,7 +1,7 @@
 <resources>
     <string name="about_website_label">Website:</string>
     <string name="about_bitcoin_label">Donate Bitcoin:</string>
-    <string name="about_librepay_label">Donate Librepay:</string>
+    <string name="about_librepay_label">Donate Liberapay:</string>
     <string name="about_developer_email_label">Developer\'s email:</string>
     <string name="about_logged_in">You are logged in as:</string>
     <string name="about_copied_to_clipboard">Copied to clipboard</string>
@@ -40,6 +40,9 @@
     <string name="action_make_system">Convert to system app</string>
     <string name="action_make_normal">Convert to normal app</string>
     <string name="action_bug_report">Report an issue</string>
+    <string name="action_wishlist">Wishlist</string>
+    <string name="action_wishlist_add">Add to wishlist</string>
+    <string name="action_wishlist_remove">Remove from wishlist</string>
     <string name="search_filter">All apps</string>
     <string name="search_title">Search applications</string>
     <string name="dialog_title_package_id">Package with this name exists</string>
@@ -52,7 +55,7 @@
     <string name="dialog_title_logout">Log out?</string>
     <string name="dialog_message_logout">Are you sure you want to log out?</string>
     <string name="dialog_account_type_provided_by_user">With my own Google account</string>
-    <string name="dialog_account_type_predefined">With a fake Yalp Store account</string>
+    <string name="dialog_account_type_predefined">With a built-in Yalp Store account</string>
     <string name="dialog_account_type_title">How would you like to log in to Google Play Store?</string>
     <string name="dialog_title_logging_in">Logging in</string>
     <string name="dialog_message_logging_in_provided_by_user">Trying to log in with the credentials you provided</string>
