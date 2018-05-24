@@ -56,6 +56,7 @@ public class PreferenceUtil {
     public static final String PREFERENCE_PROXY_TYPE = "PREFERENCE_PROXY_TYPE";
     public static final String PREFERENCE_PROXY_HOST = "PREFERENCE_PROXY_HOST";
     public static final String PREFERENCE_PROXY_PORT = "PREFERENCE_PROXY_PORT";
+    public static final String PREFERENCE_EXODUS = "PREFERENCE_EXODUS";
 
     public static final String INSTALLATION_METHOD_DEFAULT = "default";
     public static final String INSTALLATION_METHOD_ROOT = "root";
@@ -89,7 +90,10 @@ public class PreferenceUtil {
     }
 
     static public Set<String> getStringSet(Context context, String key) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return getStringSet(PreferenceManager.getDefaultSharedPreferences(context), key);
+    }
+
+    static public Set<String> getStringSet(SharedPreferences preferences, String key) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             try {
                 return preferences.getStringSet(key, new HashSet<String>());

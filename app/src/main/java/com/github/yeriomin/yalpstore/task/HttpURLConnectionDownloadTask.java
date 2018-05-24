@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -112,7 +114,7 @@ public class HttpURLConnectionDownloadTask extends AsyncTask<String, Long, Boole
         InputStream in;
         long fileSize;
         try {
-            connection = NetCipher.getHttpURLConnection(params[0]);
+            connection = NetCipher.getHttpURLConnection(new URL(params[0]), true);
             if (params.length == 2 && !TextUtils.isEmpty(params[1])) {
                 connection.addRequestProperty("Cookie", params[1]);
             }
@@ -236,5 +238,13 @@ public class HttpURLConnectionDownloadTask extends AsyncTask<String, Long, Boole
             }
         }
         return md.digest();
+    }
+
+    public AsyncTask<String, Long, Boolean> executeOnExecutorIfPossible(String... args) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            return this.execute(args);
+        } else {
+            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args);
+        }
     }
 }

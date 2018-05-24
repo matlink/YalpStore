@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.github.yeriomin.yalpstore.delta.PatcherFactory;
 import com.github.yeriomin.yalpstore.model.App;
 import com.github.yeriomin.yalpstore.notification.NotificationManagerWrapper;
 
@@ -31,7 +32,16 @@ public class GlobalDownloadReceiver extends DownloadReceiver {
     private NotificationManagerWrapper notificationManager;
 
     @Override
-    protected void process(Context c, Intent i) {
+    protected void process(final Context c, final Intent i) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                processInBackground(c, i);
+            }
+        }).start();
+    }
+
+    private void processInBackground(Context c, Intent i) {
         notificationManager = new NotificationManagerWrapper(c);
         App app = state.getApp();
 
@@ -41,7 +51,7 @@ public class GlobalDownloadReceiver extends DownloadReceiver {
         }
         boolean patchSuccess = false;
         if (isDelta(app)) {
-            patchSuccess = DeltaPatcherFactory.get(context, app).patch();
+            patchSuccess = PatcherFactory.get(context, app).patch();
             if (!patchSuccess) {
                 Log.e(getClass().getSimpleName(), "Delta patching failed for " + app.getPackageName());
                 return;

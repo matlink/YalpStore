@@ -47,6 +47,9 @@ public class DownloadManagerFake extends DownloadManagerAbstract {
     public long enqueue(App app, AndroidAppDeliveryData deliveryData, Type type) {
         Log.i(getClass().getSimpleName(), "Downloading " + type.name() + " for " + app.getPackageName());
         String url = getUrl(deliveryData, type);
+        if (type.equals(Type.DELTA)) {
+            DownloadState.get(app.getPackageName()).setPatchFormat(getPatchFormat(deliveryData.getPatchData().getPatchFormat()));
+        }
         long downloadId = url.hashCode();
         Log.i(getClass().getSimpleName(), "Download id " + downloadId);
         statuses.put(downloadId, DownloadManagerInterface.IN_PROGRESS);
@@ -61,7 +64,7 @@ public class DownloadManagerFake extends DownloadManagerAbstract {
             HttpCookie cookie = deliveryData.getDownloadAuthCookie(0);
             cookieString = cookie.getName() + "=" + cookie.getValue();
         }
-        task.execute(url, cookieString);
+        task.executeOnExecutorIfPossible(url, cookieString);
         return downloadId;
     }
 

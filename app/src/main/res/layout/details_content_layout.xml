@@ -68,6 +68,16 @@
     <include layout="@layout/details_button_bar"/>
 
     <TextView
+        android:id="@+id/availability"
+        android:padding="16dp"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/details_not_available_on_play_store"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/short_description"
         android:padding="16dp"
         android:textSize="16sp"
@@ -220,6 +230,22 @@
         android:visibility="gone" />
 
     <TextView
+        android:id="@+id/exodus"
+        android:focusable="true"
+        android:drawableLeft="@drawable/ic_exodus"
+        android:drawableStart="@drawable/ic_exodus"
+        android:drawablePadding="6dp"
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
+        android:paddingRight="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="18sp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/to_play_store"
         android:focusable="true"
         android:drawableLeft="@drawable/ic_google_play"
@@ -231,6 +257,23 @@
         android:paddingEnd="16dp"
         android:textSize="18sp"
         android:text="@string/details_to_play_store"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/to_fdroid"
+        android:focusable="true"
+        android:drawableLeft="@drawable/ic_fdroid"
+        android:drawableStart="@drawable/ic_fdroid"
+        android:drawablePadding="6dp"
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
+        android:paddingRight="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="18sp"
+        android:text="@string/details_to_fdroid"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -250,7 +293,8 @@
         android:text="@string/details_share"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
-        android:layout_height="48dp" />
+        android:layout_height="48dp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/system_app_info"

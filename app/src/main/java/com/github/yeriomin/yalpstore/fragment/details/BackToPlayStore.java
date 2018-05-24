@@ -25,9 +25,11 @@ import android.widget.TextView;
 
 import com.github.yeriomin.yalpstore.DetailsActivity;
 import com.github.yeriomin.yalpstore.R;
+import com.github.yeriomin.yalpstore.fragment.Abstract;
 import com.github.yeriomin.yalpstore.model.App;
-import com.github.yeriomin.yalpstore.task.playstore.PurchaseTask;
 import com.github.yeriomin.yalpstore.view.UriOnClickListener;
+
+import static com.github.yeriomin.yalpstore.view.PurchaseDialogBuilder.URL_PURCHASE;
 
 public class BackToPlayStore extends Abstract {
 
@@ -44,7 +46,7 @@ public class BackToPlayStore extends Abstract {
         }
         TextView toPlayStore = activity.findViewById(R.id.to_play_store);
         toPlayStore.setVisibility(View.VISIBLE);
-        toPlayStore.setOnClickListener(new UriOnClickListener(activity, PurchaseTask.URL_PURCHASE + app.getPackageName()));
+        toPlayStore.setOnClickListener(new UriOnClickListener(activity, URL_PURCHASE + app.getPackageName()));
     }
 
     private boolean isPlayStoreInstalled() {

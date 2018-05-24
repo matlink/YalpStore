@@ -23,46 +23,39 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import java.util.Collection;
 import java.util.Set;
 
-public class LocalWishlist {
+public class VersionIgnoreManager {
 
-    static private final String PREFERENCE_WISHLIST = "PREFERENCE_WISHLIST";
+    static private final String PREFERENCE_VERSION_BLACK_LIST = "PREFERENCE_VERSION_BLACK_LIST";
 
     private SharedPreferences preferences;
-    private Set<String> packageNames;
+    private Set<String> ignoredVersions;
 
-    public LocalWishlist(Context context) {
+    public VersionIgnoreManager(Context context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        packageNames = PreferenceUtil.getStringSet(context, PREFERENCE_WISHLIST);
+        ignoredVersions = PreferenceUtil.getStringSet(context, PREFERENCE_VERSION_BLACK_LIST);
+    }
+
+    public void add(String packageName, int versionCode) {
+        ignoredVersions.add(getKey(packageName, versionCode));
+        save();
+    }
+
+    public void remove(String packageName, int versionCode) {
+        ignoredVersions.add(getKey(packageName, versionCode));
+        save();
+    }
+
+    public boolean isUpdatable(String packageName, int versionCode) {
+        return !ignoredVersions.contains(getKey(packageName, versionCode));
     }
 
     private void save() {
-        PreferenceUtil.putStringSet(preferences, PREFERENCE_WISHLIST, packageNames);
+        PreferenceUtil.putStringSet(preferences, PREFERENCE_VERSION_BLACK_LIST, ignoredVersions);
     }
 
-    public String[] get() {
-        return packageNames.toArray(new String[packageNames.size()]);
-    }
-
-    public void update(Collection<String> newPackageNames) {
-        packageNames.clear();
-        packageNames.addAll(newPackageNames);
-        save();
-    }
-
-    public void add(String packageName) {
-        packageNames.add(packageName);
-        save();
-    }
-
-    public void remove(String packageName) {
-        packageNames.remove(packageName);
-        save();
-    }
-
-    public boolean contains(String packageName) {
-        return packageNames.contains(packageName);
+    static private String getKey(String packageName, int versionCode) {
+        return packageName + "|" + Integer.toString(versionCode);
     }
 }

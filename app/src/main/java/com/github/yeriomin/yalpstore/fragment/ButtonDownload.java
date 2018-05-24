@@ -17,22 +17,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.github.yeriomin.yalpstore.fragment.details;
+package com.github.yeriomin.yalpstore.fragment;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
 import com.github.yeriomin.playstoreapi.AndroidAppDeliveryData;
+import com.github.yeriomin.playstoreapi.GooglePlayAPI;
 import com.github.yeriomin.yalpstore.BuildConfig;
 import com.github.yeriomin.yalpstore.ContextUtil;
+import com.github.yeriomin.yalpstore.DownloadManagerAbstract;
 import com.github.yeriomin.yalpstore.DownloadState;
 import com.github.yeriomin.yalpstore.Downloader;
 import com.github.yeriomin.yalpstore.ManualDownloadActivity;
 import com.github.yeriomin.yalpstore.Paths;
 import com.github.yeriomin.yalpstore.R;
 import com.github.yeriomin.yalpstore.YalpStoreActivity;
+import com.github.yeriomin.yalpstore.YalpStoreApplication;
 import com.github.yeriomin.yalpstore.YalpStorePermissionManager;
 import com.github.yeriomin.yalpstore.model.App;
 import com.github.yeriomin.yalpstore.selfupdate.UpdaterFactory;
@@ -62,6 +66,8 @@ public class ButtonDownload extends Button {
                 || apk.length() != app.getSize()
                 || !DownloadState.get(app.getPackageName()).isEverythingSuccessful()
             )
+            && (app.isFree() || YalpStoreApplication.purchasedPackageNames.contains(app.getPackageName()))
+            && (app.getRestriction() == GooglePlayAPI.AVAILABILITY_NOT_RESTRICTED || YalpStoreApplication.purchasedPackageNames.contains(app.getPackageName()))
             && (app.isInPlayStore() || app.getPackageName().equals(BuildConfig.APPLICATION_ID))
             && (getInstalledVersionCode() != app.getVersionCode() || activity instanceof ManualDownloadActivity)
         ;
@@ -185,8 +191,9 @@ public class ButtonDownload extends Button {
             super.onPostExecute(deliveryData);
             if (!success()) {
                 fragment.draw();
-                if (null != getRestrictionString()) {
-                    ContextUtil.toastLong(context, getRestrictionString());
+                String restriction = DownloadManagerAbstract.getRestrictionString(context, app.getRestriction());
+                if (!TextUtils.isEmpty(restriction)) {
+                    ContextUtil.toastLong(context, restriction);
                     Log.i(getClass().getSimpleName(), "No download link returned, app restriction is " + app.getRestriction());
                 }
             }

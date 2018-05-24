@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,7 +120,7 @@ public class NativeHttpClientAdapter extends HttpClientAdapter {
     }
 
     protected HttpURLConnection getHttpURLConnection(String url) throws IOException {
-        return NetCipher.getHttpURLConnection(url);
+        return NetCipher.getHttpURLConnection(new URL(url), true);
     }
 
     protected byte[] request(HttpURLConnection connection, byte[] body, Map<String, String> headers) throws IOException {
@@ -150,7 +151,7 @@ public class NativeHttpClientAdapter extends HttpClientAdapter {
         }
         try {
             code = connection.getResponseCode();
-            Log.i(getClass().getSimpleName(), "HTTP result code " + code);
+            Log.i(getClass().getSimpleName(), "HTTP result code " + code + " Cache " + connection.getHeaderField("X-Android-Response-Source"));
             content = readFully(connection.getInputStream(), isGzip);
         } catch (IOException e) {
             content = readFully(connection.getErrorStream(), isGzip);

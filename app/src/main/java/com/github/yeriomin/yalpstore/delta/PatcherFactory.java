@@ -17,30 +17,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.github.yeriomin.yalpstore.fragment.details;
+package com.github.yeriomin.yalpstore.delta;
 
-import android.widget.TextView;
+import android.content.Context;
 
-import com.github.yeriomin.yalpstore.YalpStoreActivity;
+import com.github.yeriomin.yalpstore.DownloadState;
 import com.github.yeriomin.yalpstore.model.App;
 
-public abstract class Abstract {
+public class PatcherFactory {
 
-    protected YalpStoreActivity activity;
-    protected App app;
-
-    abstract public void draw();
-
-    public Abstract(YalpStoreActivity activity, App app) {
-        this.activity = activity;
-        this.app = app;
-    }
-
-    protected void setText(int viewId, String text) {
-        ((TextView) activity.findViewById(viewId)).setText(text);
-    }
-
-    protected void setText(int viewId, int stringId, Object... text) {
-        setText(viewId, activity.getString(stringId, text));
+    static public Patcher get(Context context, App app) {
+        switch (DownloadState.get(app.getPackageName()).getPatchFormat()) {
+            case GZIPPED_BSDIFF:
+                return new BSDiff(context, app);
+            default:
+                return new GDiff(context, app);
+        }
     }
 }

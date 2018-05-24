@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.github.yeriomin.yalpstore.fragment.details;
+package com.github.yeriomin.yalpstore.fragment;
 
 import android.app.NotificationManager;
 import android.content.Context;
@@ -26,10 +26,10 @@ import android.view.View;
 import com.github.yeriomin.yalpstore.DetailsActivity;
 import com.github.yeriomin.yalpstore.DownloadState;
 import com.github.yeriomin.yalpstore.InstallationState;
-import com.github.yeriomin.yalpstore.InstallerFactory;
 import com.github.yeriomin.yalpstore.Paths;
 import com.github.yeriomin.yalpstore.R;
 import com.github.yeriomin.yalpstore.model.App;
+import com.github.yeriomin.yalpstore.task.InstallTask;
 
 public class ButtonInstall extends Button {
 
@@ -64,6 +64,6 @@ public class ButtonInstall extends Button {
     protected void onButtonClick(View v) {
         disable(R.string.details_installing);
         ((NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(app.getDisplayName().hashCode());
-        InstallerFactory.get(activity).verifyAndInstall(app);
+        new InstallTask(activity, app).execute();
     }
 }
