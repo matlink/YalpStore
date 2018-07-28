@@ -23,13 +23,13 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.github.yeriomin.playstoreapi.AuthException;
 import com.github.yeriomin.playstoreapi.GooglePlayException;
 import com.github.yeriomin.playstoreapi.TokenDispenserException;
+import com.github.yeriomin.yalpstore.BaseActivity;
 import com.github.yeriomin.yalpstore.ContextUtil;
 import com.github.yeriomin.yalpstore.CredentialsEmptyException;
 import com.github.yeriomin.yalpstore.FirstLaunchChecker;
@@ -64,6 +64,9 @@ public abstract class CheckCredentialsTask extends PlayStoreTask<Void> {
                 Log.i(getClass().getSimpleName(), caller.getClass().getSimpleName() + " is cloneable. Retrying.");
                 ((PlayStoreTask) ((CloneableTask) caller).clone()).execute((Object[]) new String[] {});
             }
+            if (context instanceof BaseActivity) {
+                ((BaseActivity) context).redrawLogoutItem();
+            }
         }
     }
 
@@ -90,7 +93,7 @@ public abstract class CheckCredentialsTask extends PlayStoreTask<Void> {
         if (e instanceof TokenDispenserException) {
             ContextUtil.toast(context, R.string.error_token_dispenser_problem);
         } else if (e instanceof GooglePlayException && ((GooglePlayException) e).getCode() == 500) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(PreferenceUtil.PREFERENCE_BACKGROUND_UPDATE_INTERVAL, "-1").commit();
+            PreferenceUtil.getDefaultSharedPreferences(context).edit().putString(PreferenceUtil.PREFERENCE_BACKGROUND_UPDATE_INTERVAL, "-1").commit();
             ContextUtil.toast(context, R.string.error_invalid_device_definition);
             context.startActivity(new Intent(context, PreferenceActivity.class));
         }

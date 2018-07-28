@@ -16,10 +16,10 @@ android {
         applicationId "com.github.yeriomin.yalpstore"
         minSdkVersion 5
         targetSdkVersion 27
-        versionCode 41
+        versionCode 43
         versionName getVersionName()
         vectorDrawables.useSupportLibrary = true
-        resConfigs "ar", "ast", "cs", "de", "el", "en", "es", "eu", "fr", "fr-rBE", "it", "ja", "kk", "ko", "nl", "pl", "pt", "pt-rBR", "ru", "sk", "uk", "zh"
+        resConfigs "ar", "ast", "bg", "cs", "de", "el", "en", "es", "eu", "fr", "fr-rBE", "in", "it", "ja", "kk", "ko", "nl", "pl", "pt", "pt-rBR", "ru", "sk", "uk", "zh", "zh-rTW"
     }
     buildTypes {
         release {
@@ -37,7 +37,6 @@ android {
             dimension "minApi"
             minSdkVersion 14
             versionCode (1000 + android.defaultConfig.versionCode)
-            applicationIdSuffix "plus"
         }
     }
     lintOptions {
@@ -51,7 +50,7 @@ dependencies {
     contemporaryImplementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'commons-net:commons-net:3.5'
     implementation 'com.nothome:javaxdelta:2.0.1'
-    debugImplementation 'com.github.yeriomin:play-store-api:master-SNAPSHOT'
-    releaseImplementation 'com.github.yeriomin:play-store-api:0.41'
+    debugImplementation 'com.github.yeriomin:play-store-api:0.42'
+    releaseImplementation 'com.github.yeriomin:play-store-api:0.42'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201608240809'
 }

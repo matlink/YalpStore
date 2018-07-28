@@ -33,9 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
-
-import info.guardianproject.netcipher.NetCipher;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class BitmapManager {
@@ -58,7 +55,7 @@ public class BitmapManager {
 
     public BitmapManager(Context context) {
         baseDir = context.getCacheDir();
-        noImages = PreferenceUtil.getBoolean(context, PreferenceUtil.PREFERENCE_NO_IMAGES) && NetworkState.isMetered(context);
+        noImages = PreferenceUtil.getBoolean(context, PreferenceUtil.PREFERENCE_NO_IMAGES) && NetworkUtil.isMetered(context);
     }
 
     public Bitmap getBitmap(String url, boolean fullSize) {
@@ -108,14 +105,18 @@ public class BitmapManager {
     }
 
     static private Bitmap getCachedBitmapFromDisk(File cached) {
+        FileInputStream inputStream = null;
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
             options.inDither = false;
-            return BitmapFactory.decodeStream(new FileInputStream(cached), null, options);
+            inputStream = new FileInputStream(cached);
+            return BitmapFactory.decodeStream(inputStream, null, options);
         } catch (IOException e) {
             Log.e(BitmapManager.class.getSimpleName(), "Could not get cached bitmap: " + e.getClass().getName() + " " + e.getMessage());
             return null;
+        } finally {
+            Util.closeSilently(inputStream);
         }
     }
 
@@ -141,7 +142,7 @@ public class BitmapManager {
     static private Bitmap downloadBitmap(String url, boolean fullSize) {
         InputStream input = null;
         try {
-            HttpURLConnection connection = NetCipher.getHttpURLConnection(new URL(url), true);
+            HttpURLConnection connection = NetworkUtil.getHttpURLConnection(url);
             connection.connect();
             connection.setConnectTimeout(3000);
             input = connection.getInputStream();

@@ -71,6 +71,7 @@ public class App implements Comparable<App> {
     private boolean testingProgramOptedIn;
     private String testingProgramEmail;
     private int restriction;
+    private String instantAppLink;
 
     public App() {
         this.packageInfo = new PackageInfo();
@@ -80,8 +81,6 @@ public class App implements Comparable<App> {
         this.setPackageInfo(packageInfo);
         this.setVersionName(packageInfo.versionName);
         this.setVersionCode(packageInfo.versionCode);
-        this.setInstalled(true);
-        this.setSystem(null != packageInfo.applicationInfo && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         if (null != packageInfo.requestedPermissions) {
             this.setPermissions(Arrays.asList(packageInfo.requestedPermissions));
         }
@@ -97,6 +96,8 @@ public class App implements Comparable<App> {
 
     public void setPackageInfo(PackageInfo packageInfo) {
         this.packageInfo = packageInfo;
+        this.setInstalled(true);
+        this.setSystem(null != packageInfo.applicationInfo && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
     }
 
     public String getDisplayName() {
@@ -371,6 +372,14 @@ public class App implements Comparable<App> {
 
     public void setRestriction(int restriction) {
         this.restriction = restriction;
+    }
+
+    public String getInstantAppLink() {
+        return instantAppLink;
+    }
+
+    public void setInstantAppLink(String instantAppLink) {
+        this.instantAppLink = instantAppLink;
     }
 
     @Override

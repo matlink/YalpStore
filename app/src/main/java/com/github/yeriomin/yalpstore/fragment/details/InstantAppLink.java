@@ -17,44 +17,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.github.yeriomin.yalpstore.fragment;
+package com.github.yeriomin.yalpstore.fragment.details;
 
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.TextView;
 
 import com.github.yeriomin.yalpstore.R;
 import com.github.yeriomin.yalpstore.YalpStoreActivity;
-import com.github.yeriomin.yalpstore.YalpStoreApplication;
+import com.github.yeriomin.yalpstore.fragment.Abstract;
 import com.github.yeriomin.yalpstore.model.App;
-import com.github.yeriomin.yalpstore.view.PurchaseDialogBuilder;
 import com.github.yeriomin.yalpstore.view.UriOnClickListener;
 
-public class ButtonBuy extends Button {
-
-    public ButtonBuy(YalpStoreActivity activity, App app) {
-        super(activity, app);
-    }
-
-    @Override
-    protected View getButton() {
-        return activity.findViewById(R.id.buy);
-    }
-
-    @Override
-    protected boolean shouldBeVisible() {
-        return !YalpStoreApplication.purchasedPackageNames.contains(app.getPackageName()) && !app.isInstalled() && !app.isFree();
-    }
+public class InstantAppLink extends Abstract {
 
     @Override
     public void draw() {
-        super.draw();
-        android.widget.Button button = (android.widget.Button) getButton();
-        if (null != button) {
-            button.setText(app.getPrice());
+        TextView instantAppView = activity.findViewById(R.id.instant_app);
+        if (null == instantAppView) {
+            return;
         }
+        if (TextUtils.isEmpty(app.getInstantAppLink())) {
+            instantAppView.setVisibility(View.GONE);
+            return;
+        }
+        instantAppView.setVisibility(View.VISIBLE);
+        instantAppView.setOnClickListener(new UriOnClickListener(activity, app.getInstantAppLink()));
     }
 
-    @Override
-    protected void onButtonClick(View v) {
-        new UriOnClickListener(activity, PurchaseDialogBuilder.URL_PURCHASE + app.getPackageName()).onClick(v);
+    public InstantAppLink(YalpStoreActivity activity, App app) {
+        super(activity, app);
     }
 }

@@ -58,7 +58,7 @@ public class DownloadManagerFake extends DownloadManagerAbstract {
         HttpURLConnectionDownloadTask task = new HttpURLConnectionDownloadTask();
         task.setContext(context);
         task.setDownloadId(downloadId);
-        task.setTargetFile(getDestinationFile(app, type));
+        task.setTargetFile(getTargetFile(deliveryData, app, type));
         String cookieString = null;
         if (deliveryData.getDownloadAuthCookieCount() > 0) {
             HttpCookie cookie = deliveryData.getDownloadAuthCookie(0);
@@ -80,7 +80,7 @@ public class DownloadManagerFake extends DownloadManagerAbstract {
 
     @Override
     public String getError(long downloadId) {
-        return getErrorString(context, statuses.get(downloadId));
+        return getErrorString(context, statuses.containsKey(downloadId) ? statuses.get(downloadId) : DownloadManagerInterface.ERROR_UNKNOWN);
     }
 
     private String getUrl(AndroidAppDeliveryData deliveryData, Type type) {
@@ -98,16 +98,16 @@ public class DownloadManagerFake extends DownloadManagerAbstract {
         }
     }
 
-    private File getDestinationFile(App app, Type type) {
+    private File getTargetFile(AndroidAppDeliveryData deliveryData, App app, Type type) {
         switch (type) {
             case APK:
                 return Paths.getApkPath(context, app.getPackageName(), app.getVersionCode());
             case DELTA:
                 return Paths.getDeltaPath(context, app.getPackageName(), app.getVersionCode());
             case OBB_MAIN:
-                return Paths.getObbPath(app.getPackageName(), app.getVersionCode(), true);
+                return Paths.getObbPath(app.getPackageName(), deliveryData.getAdditionalFile(0).getVersionCode(), true);
             case OBB_PATCH:
-                return Paths.getObbPath(app.getPackageName(), app.getVersionCode(), false);
+                return Paths.getObbPath(app.getPackageName(), deliveryData.getAdditionalFile(1).getVersionCode(), false);
             default:
                 throw new RuntimeException("Unknown request type");
         }

@@ -20,19 +20,18 @@
 package com.github.yeriomin.yalpstore.task;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Build;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 
+import com.github.yeriomin.yalpstore.NetworkUtil;
 import com.github.yeriomin.yalpstore.Util;
 import com.github.yeriomin.yalpstore.YalpStoreApplication;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -43,12 +42,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 
-import info.guardianproject.netcipher.NetCipher;
 
-public class FdroidListTask extends AsyncTask<Void, Void, Void> {
+public class FdroidListTask extends TaskWithProgress<Void> {
 
     static private final String FDROID_REPO_URL = "https://f-droid.org/repo/index.xml";
     static private final String FDROID_REPO_LOCAL_XML = "fdroid.xml";
@@ -60,7 +58,10 @@ public class FdroidListTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Void doInBackground(String... strings) {
+        if (localXmlFile.exists() && localXmlFile.lastModified() + DateUtils.WEEK_IN_MILLIS < System.currentTimeMillis()) {
+            localXmlFile.delete();
+        }
         if (!localXmlFile.exists()) {
             downloadXml();
         }
@@ -75,7 +76,7 @@ public class FdroidListTask extends AsyncTask<Void, Void, Void> {
     private void downloadXml() {
         try {
             URL url = new URL(FDROID_REPO_URL);
-            NetCipher.getHttpsURLConnection(url, true).connect();
+            NetworkUtil.getHttpURLConnection(url).connect();
             InputStream input = new BufferedInputStream(url.openStream(), 8192);
             OutputStream output = new FileOutputStream(localXmlFile);
             byte data[] = new byte[1024];
@@ -93,18 +94,21 @@ public class FdroidListTask extends AsyncTask<Void, Void, Void> {
 
     private void parseXml() {
         try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new FileInputStream(localXmlFile)));
-            doc.getDocumentElement().normalize();
-            NodeList nodeList = doc.getElementsByTagName("fdroid").item(0).getChildNodes();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node stringNode = nodeList.item(i);
-                if (!(stringNode instanceof Element) || !((Element) stringNode).getTagName().equals("application")) {
-                    continue;
-                }
-                YalpStoreApplication.fdroidPackageNames.add(((Element) stringNode).getAttribute("id"));
-            }
+            SAXParserFactory.newInstance().newSAXParser().parse(new FileInputStream(localXmlFile), new SaxHandler());
         } catch (IOException | ParserConfigurationException | SAXException e) {
-            Log.e(getClass().getSimpleName(), "Read or parse F-Droid repo file: " + e.getMessage());
+            Log.e(getClass().getSimpleName(), "Could not read or parse F-Droid repo file: " + e.getMessage());
+        }
+    }
+
+    private static class SaxHandler extends DefaultHandler {
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            super.startElement(uri, localName, qName, attributes);
+            String packageName = attributes.getValue("id");
+            if (qName.equalsIgnoreCase("application") && !TextUtils.isEmpty(packageName)) {
+                YalpStoreApplication.fdroidPackageNames.add(packageName);
+            }
         }
     }
 }

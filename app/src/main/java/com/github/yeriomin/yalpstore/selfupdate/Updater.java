@@ -21,16 +21,15 @@ package com.github.yeriomin.yalpstore.selfupdate;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.github.yeriomin.yalpstore.BuildConfig;
+import com.github.yeriomin.yalpstore.NetworkUtil;
+import com.github.yeriomin.yalpstore.PreferenceUtil;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import info.guardianproject.netcipher.NetCipher;
 
 abstract public class Updater {
 
@@ -59,7 +58,7 @@ abstract public class Updater {
     }
 
     private int getCachedVersionCode() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences preferences = PreferenceUtil.getDefaultSharedPreferences(context);
         return (System.currentTimeMillis() - preferences.getLong(CACHED_VERSION_CODE_CHECKED_AT, 0)) > CACHED_VERSION_CODE_VALID_FOR
             ? 0
             : preferences.getInt(CACHED_VERSION_CODE, 0)
@@ -67,7 +66,7 @@ abstract public class Updater {
     }
 
     private void cacheVersionCode(int versionCode) {
-        SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        SharedPreferences.Editor preferences = PreferenceUtil.getDefaultSharedPreferences(context).edit();
         preferences.putInt(CACHED_VERSION_CODE, versionCode);
         preferences.putLong(CACHED_VERSION_CODE_CHECKED_AT, System.currentTimeMillis());
         preferences.commit();
@@ -88,7 +87,7 @@ abstract public class Updater {
             if (null == url) {
                 return false;
             }
-            HttpURLConnection connection = NetCipher.getHttpURLConnection(url, true);
+            HttpURLConnection connection = NetworkUtil.getHttpURLConnection(url);
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("HEAD");
             return connection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST;

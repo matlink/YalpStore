@@ -27,6 +27,7 @@ import com.github.yeriomin.playstoreapi.GooglePlayException;
 import com.github.yeriomin.yalpstore.BuildConfig;
 import com.github.yeriomin.yalpstore.ContextUtil;
 import com.github.yeriomin.yalpstore.R;
+import com.github.yeriomin.yalpstore.YalpStoreApplication;
 import com.github.yeriomin.yalpstore.model.App;
 import com.github.yeriomin.yalpstore.model.AppBuilder;
 import com.github.yeriomin.yalpstore.selfupdate.UpdaterFactory;
@@ -55,10 +56,12 @@ public class DetailsTask extends PlayStorePayloadTask<App> {
         PackageManager pm = context.getPackageManager();
         try {
             app.getPackageInfo().applicationInfo = pm.getApplicationInfo(packageName, 0);
-            app.getPackageInfo().versionCode = pm.getPackageInfo(packageName, 0).versionCode;
-            app.setInstalled(true);
         } catch (PackageManager.NameNotFoundException e) {
             // App is not installed
+        }
+        if (YalpStoreApplication.installedPackages.containsKey(packageName)) {
+            app.getPackageInfo().versionCode = YalpStoreApplication.installedPackages.get(packageName).getVersionCode();
+            app.setInstalled(true);
         }
         return app;
     }
@@ -69,14 +72,7 @@ public class DetailsTask extends PlayStorePayloadTask<App> {
     }
 
     private App getSelf() {
-        App app = new App();
-        PackageManager pm = context.getPackageManager();
-        try {
-            app = new App(pm.getPackageInfo(packageName, PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS));
-            app.setDisplayName(pm.getApplicationLabel(app.getPackageInfo().applicationInfo).toString());
-        } catch (PackageManager.NameNotFoundException e) {
-            // App is not installed
-        }
+        App app = YalpStoreApplication.installedPackages.get(BuildConfig.APPLICATION_ID);
         int latestVersionCode = UpdaterFactory.get(context).getLatestVersionCode();
         app.setVersionCode(latestVersionCode);
         app.setVersionName("0." + latestVersionCode);

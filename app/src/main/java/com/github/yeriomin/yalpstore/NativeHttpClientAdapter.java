@@ -19,7 +19,6 @@
 
 package com.github.yeriomin.yalpstore;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
@@ -37,7 +36,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,26 +43,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import info.guardianproject.netcipher.NetCipher;
-import info.guardianproject.netcipher.client.StrongConnectionBuilder;
-
 public class NativeHttpClientAdapter extends HttpClientAdapter {
 
     static private final int TIMEOUT = 15000;
+    static private final int BUFFER_SIZE = 8192;
 
     static {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
             System.setProperty("http.keepAlive", "false");
-        }
-    }
-
-    protected StrongConnectionBuilder builder;
-
-    public NativeHttpClientAdapter(Context context) {
-        try {
-            builder = StrongConnectionBuilder.forMaxSecurity(context);
-        } catch (Exception e) {
-            Log.e(getClass().getSimpleName(), "Could build connection: " + e.getMessage());
         }
     }
 
@@ -120,12 +106,13 @@ public class NativeHttpClientAdapter extends HttpClientAdapter {
     }
 
     protected HttpURLConnection getHttpURLConnection(String url) throws IOException {
-        return NetCipher.getHttpURLConnection(new URL(url), true);
+        return NetworkUtil.getHttpURLConnection(url);
     }
 
     protected byte[] request(HttpURLConnection connection, byte[] body, Map<String, String> headers) throws IOException {
         connection.setConnectTimeout(TIMEOUT);
         connection.setReadTimeout(TIMEOUT);
+        connection.setRequestProperty("Connection", "close");
         connection.setRequestProperty("Accept-Encoding", "gzip");
         connection.addRequestProperty("Cache-Control", "max-age=300");
         for (String headerName: headers.keySet()) {
@@ -135,7 +122,14 @@ public class NativeHttpClientAdapter extends HttpClientAdapter {
 
         byte[] content = new byte[0];
         Log.i(getClass().getSimpleName(), "Requesting " + connection.getURL().toString());
-        connection.connect();
+        try {
+            connection.connect();
+        } catch (NullPointerException e) {
+            // This is a known bug in Android 7.0; it was fixed by this change which went into Android 7.1:
+            // https://android-review.googlesource.com/#/c/271775/
+            // https://github.com/square/okhttp/issues/3245
+            throw new IOException("This is a known bug in Android 7.0; it was fixed by this change which went into Android 7.1: " + e.getMessage());
+        }
 
         int code = 0;
         boolean isGzip;
@@ -214,8 +208,8 @@ public class NativeHttpClientAdapter extends HttpClientAdapter {
         if (gzipped) {
             inputStream = new GZIPInputStream(inputStream);
         }
-        InputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        byte[] buffer = new byte[8192];
+        InputStream bufferedInputStream = new BufferedInputStream(inputStream, BUFFER_SIZE);
+        byte[] buffer = new byte[BUFFER_SIZE];
         int bytesRead;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {

@@ -129,6 +129,8 @@
     <string name="details_exodus_searching">searching</string>
     <string name="details_exodus_not_found">not found</string>
     <string name="details_exodus_found">"%1$s trackers"</string>
+    <string name="details_exodus_submitting">submitting</string>
+    <string name="details_exodus_view">view report</string>
     <string name="credentials_hint_email">e-mail here</string>
     <string name="credentials_hint_password">password here</string>
     <string name="credentials_title">Google account access</string>
@@ -281,4 +283,5 @@
     <string name="pref_include_disabled">Update disabled apps</string>
     <string name="pref_download_include_disabled_on">Disabled apps will be updated</string>
     <string name="pref_include_disabled_off">Disabled apps will be ignored</string>
+    <string name="details_instant_app">Instant app</string>
 </resources>

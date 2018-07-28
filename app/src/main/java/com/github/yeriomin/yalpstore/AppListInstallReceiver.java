@@ -19,34 +19,27 @@
 
 package com.github.yeriomin.yalpstore;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.content.Intent;
+import android.content.IntentFilter;
 
-import com.github.yeriomin.yalpstore.view.ListItem;
+import java.lang.ref.WeakReference;
 
+public class AppListInstallReceiver extends BroadcastReceiver {
 
-public class AppListAdapter extends ArrayAdapter<ListItem> {
+    private WeakReference<AppListActivity> activityRef;
 
-    private int resourceId;
-    private LayoutInflater inflater;
-
-    public AppListAdapter(Context context, int resourceId) {
-        super(context, resourceId);
-        this.resourceId = resourceId;
-        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public AppListInstallReceiver(AppListActivity activity) {
+        super();
+        activityRef = new WeakReference<>(activity);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(GlobalInstallReceiver.ACTION_INSTALL_UI_UPDATE);
+        activity.registerReceiver(this, filter);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = null == convertView ? inflater.inflate(resourceId, parent, false) : convertView;
-        ListItem listItem = getItem(position);
-        if (null != listItem && null != view) {
-            listItem.setView(view);
-            listItem.draw();
-        }
-        return view;
+    public void onReceive(Context context, Intent intent) {
+        activityRef.get().onResume();
     }
 }

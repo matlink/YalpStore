@@ -26,7 +26,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.NavigationView;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
@@ -53,7 +52,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private static final int WRAPPER_LAYOUT_ID = R.layout.base_activity_layout;
 
-    private static AsyncTask previousSearchSuggestTask;
+    private static SearchSuggestionTask previousSearchSuggestTask;
 
     protected int wrapperLayoutResId = WRAPPER_LAYOUT_ID;
 
@@ -73,8 +72,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 SearchManager.SUGGEST_COLUMN_TEXT_1,
                 SearchManager.SUGGEST_COLUMN_ICON_1
             },
-            new int[] {R.id.text, R.id.icon},
-            CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
+            new int[] {R.id.text, R.id.icon}
         );
         searchView.setSuggestionsAdapter(suggestionsAdapter);
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
@@ -106,14 +104,30 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
+                if (TextUtils.isEmpty(s)
+                    || (null != previousSearchSuggestTask
+                        && !TextUtils.isEmpty(previousSearchSuggestTask.getRequestString())
+                        && previousSearchSuggestTask.getRequestString().equals(s)
+                    )
+                ) {
+                    return false;
+                }
                 if (null != previousSearchSuggestTask) {
                     previousSearchSuggestTask.cancel(true);
                 }
-                previousSearchSuggestTask = new SearchSuggestionTask(BaseActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, s);
+                previousSearchSuggestTask = (SearchSuggestionTask) new SearchSuggestionTask(BaseActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, s);
                 return false;
             }
         });
         return result;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (null != suggestionsAdapter && null != suggestionsAdapter.getCursor()) {
+            suggestionsAdapter.getCursor().close();
+        }
     }
 
     public void showSuggestions(Cursor cursor) {
@@ -156,6 +170,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         View specificLayout = getLayoutInflater().inflate(layoutResID, container, false);
         container.addView(specificLayout);
         initToolbar();
+        onContentChanged();
     }
 
     @Override
@@ -165,7 +180,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     private void initToolbar() {
-        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        final DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
@@ -190,17 +205,21 @@ public abstract class BaseActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
 
-        final NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
+        ((NavigationView) findViewById(R.id.nav_view)).setNavigationItemSelectedListener(
             new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(MenuItem menuItem) {
                     onOptionsItemSelected(menuItem);
-                    ((DrawerLayout) navigationView.getParent()).closeDrawers();
+                    drawerLayout.closeDrawers();
                     return true;
                 }
             }
         );
+        redrawLogoutItem();
+    }
+
+    public void redrawLogoutItem(){
+        NavigationView navigationView = findViewById(R.id.nav_view);
         String email = PreferenceUtil.getString(this, PREFERENCE_EMAIL);
         ((TextView) navigationView.getHeaderView(0).findViewById(R.id.username)).setText(email.split("@")[0]);
         if (!TextUtils.isEmpty(email)) {
@@ -213,10 +232,15 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     static private class SearchSuggestionTask extends AsyncTask<String, Void, Cursor> {
 
+        private String requestString;
         private WeakReference<BaseActivity> activityRef;
 
         public SearchSuggestionTask(BaseActivity activity) {
             this.activityRef = new WeakReference<>(activity);
+        }
+
+        public String getRequestString() {
+            return requestString;
         }
 
         @Override
@@ -224,12 +248,14 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (null == activityRef.get() || isCancelled()) {
                 return null;
             }
-            return activityRef.get().getContentResolver().query(new Uri.Builder().scheme("content").authority(BuildConfig.APPLICATION_ID + ".YalpStoreSuggestionProvider").appendEncodedPath(strings[0]).build(), null, null, null, null);
+            requestString = strings[0];
+            return activityRef.get().getContentResolver().query(new Uri.Builder().scheme("content").authority(BuildConfig.APPLICATION_ID + ".YalpStoreSuggestionProvider").appendEncodedPath(requestString).build(), null, null, null, null);
         }
 
         @Override
         protected void onPostExecute(Cursor cursor) {
             if (null == activityRef.get() || isCancelled()) {
+                cursor.close();
                 return;
             }
             activityRef.get().showSuggestions(cursor);
