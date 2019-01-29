@@ -23,8 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -55,13 +53,8 @@ public class InstalledAppsActivity extends AppListActivity {
         super.onCreate(savedInstanceState);
         setTitle(R.string.activity_title_updates_and_other_apps);
         new InstalledAppsMainButtonAdapter(findViewById(R.id.main_button)).init();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            new BitmapCacheCleanupTask(this.getApplicationContext()).execute();
-            new OldApkCleanupTask(this.getApplicationContext()).execute();
-        } else {
-            new BitmapCacheCleanupTask(this.getApplicationContext()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            new OldApkCleanupTask(this.getApplicationContext()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
+        new BitmapCacheCleanupTask(this.getApplicationContext()).executeOnExecutorIfPossible();
+        new OldApkCleanupTask(this.getApplicationContext()).executeOnExecutorIfPossible();
     }
 
     @Override

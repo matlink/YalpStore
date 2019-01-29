@@ -22,7 +22,6 @@ package com.github.yeriomin.yalpstore.task;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
@@ -36,12 +35,14 @@ import com.github.yeriomin.yalpstore.PreferenceUtil;
 import com.github.yeriomin.yalpstore.R;
 import com.github.yeriomin.yalpstore.model.ImageSource;
 
-public class LoadImageTask extends AsyncTask<ImageSource, Void, Void> {
+public class LoadImageTask extends LowCpuIntensityTask<Void, Void, Void> {
 
     protected ImageView imageView;
+    private ImageSource imageSource;
     private Drawable drawable;
     private String tag;
     private boolean placeholder = true;
+    private boolean forceLoadImage = false;
     private int fadeInMillis = 0;
 
     public LoadImageTask() {
@@ -58,9 +59,18 @@ public class LoadImageTask extends AsyncTask<ImageSource, Void, Void> {
         return this;
     }
 
+    public LoadImageTask setImageSource(ImageSource imageSource) {
+        this.imageSource = imageSource;
+        return this;
+    }
+
     public LoadImageTask setPlaceholder(boolean placeholder) {
         this.placeholder = placeholder;
         return this;
+    }
+
+    public void setForceLoadImage(boolean forceLoadImage) {
+        this.forceLoadImage = forceLoadImage;
     }
 
     public LoadImageTask setFadeInMillis(int fadeInMillis) {
@@ -88,32 +98,43 @@ public class LoadImageTask extends AsyncTask<ImageSource, Void, Void> {
                 fadeOut();
             }
             imageView.setImageDrawable(drawable);
+            imageView.setClickable(false);
             if (fadeInMillis > 0) {
                 fadeIn();
             }
+        } else if (noImages()) {
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    LoadImageTask task = new LoadImageTask();
+                    task.setImageView(imageView);
+                    task.setFadeInMillis(fadeInMillis);
+                    task.setPlaceholder(placeholder);
+                    task.setForceLoadImage(true);
+                    task.setImageSource(imageSource);
+                    task.executeOnExecutorIfPossible();
+                }
+            });
         }
     }
 
     @Override
-    protected Void doInBackground(ImageSource... params) {
-        ImageSource imageSource = params[0];
+    protected Void doInBackground(Void... params) {
         if (null != imageSource.getApplicationInfo()) {
             drawable = imageView.getContext().getPackageManager().getApplicationIcon(imageSource.getApplicationInfo());
         } else if (!TextUtils.isEmpty(imageSource.getUrl())) {
-            Bitmap bitmap = new BitmapManager(imageView.getContext()).getBitmap(imageSource.getUrl(), imageSource.isFullSize());
+            BitmapManager bitmapManager = new BitmapManager(imageView.getContext());
+            bitmapManager.setNoImages(noImages());
+            Bitmap bitmap = bitmapManager.getBitmap(imageSource.getUrl(), imageSource.isFullSize());
             if (null != bitmap || !noImages()) {
-                drawable = new BitmapDrawable(bitmap);
+                drawable = getDrawable(bitmap);
             }
         }
         return null;
     }
 
-    public AsyncTask<ImageSource, Void, Void> executeOnExecutorIfPossible(ImageSource... args) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            return this.execute(args);
-        } else {
-            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args);
-        }
+    protected Drawable getDrawable(Bitmap bitmap) {
+        return new BitmapDrawable(bitmap);
     }
 
     private void fadeIn() {
@@ -141,7 +162,10 @@ public class LoadImageTask extends AsyncTask<ImageSource, Void, Void> {
     }
 
     private boolean noImages() {
-        return NetworkUtil.isMetered(imageView.getContext()) && PreferenceUtil.getBoolean(imageView.getContext(), PreferenceUtil.PREFERENCE_NO_IMAGES);
+        return !forceLoadImage
+            && NetworkUtil.isMetered(imageView.getContext())
+            && PreferenceUtil.getBoolean(imageView.getContext(), PreferenceUtil.PREFERENCE_NO_IMAGES)
+        ;
     }
 
     private boolean sameAsLoaded() {

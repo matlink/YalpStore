@@ -24,15 +24,13 @@
 
        
 
-    Crie uma palavra-passe específica para a Yalp Store e utilize-a para iniciar a sessão. 
+Crie uma palavra-passe específica para a Yalp Store e utilize-a para iniciar a sessão. 
 
        
-
-   Toque em \"Criar palavra-passe\" para ser redirecionado para o diálogo de criação."</string>
+Toque em \"Criar palavra-passe\" para ser redirecionado para o diálogo de criação."</string>
 <string name="dialog_title_logout">"Fechar sessão?"</string>
 <string name="dialog_message_logout">"Tens a certeza de que deseja fechar a sessão?"</string>
-<string name="dialog_account_type_provided_by_user">"Com a sua conta Google"</string>
-<string name="dialog_account_type_predefined">"Com uma conta fornecida pela Yalp Store"</string>
+    <string name="dialog_account_type_predefined">"Com uma conta fornecida pela Yalp Store"</string>
 <string name="dialog_account_type_title">"Como quer iniciar sessão na Google Play Store?"</string>
 <string name="dialog_title_logging_in">"A iniciar sessão"</string>
 <string name="dialog_message_logging_in_provided_by_user">"A iniciar sessão com as credenciais que você introduziu"</string>
@@ -69,7 +67,7 @@
 
         
 
-        A utilização desta aplicação viola os termos do serviço da Google Play Store.  Deve ser mais seguro utilizar uma conta Google que já tenha acedido e aceitado os termos do serviço da loja."</string>
+A utilização desta aplicação viola os termos do serviço da Google Play Store.  Deve ser mais seguro utilizar uma conta Google que já tenha acedido e aceitado os termos do serviço da loja."</string>
 <string name="activity_title_search">"Procurar: \"%1$s\""</string>
 <string name="notification_download_complete">"Descarga completa. Toque para instalar."</string>
 <string name="notification_download_complete_toast">"%1$s descarregada. Toque no botão Instalar ou na notificação para instalar."</string>
@@ -97,14 +95,11 @@
 <string name="pref_background_update_interval">"Procurar atualizações periodicamente"</string>
 <string name="download_manager_ERROR_UNKNOWN">"Erro desconhecido."</string>
 <string name="download_manager_ERROR_FILE_ERROR">"Erro desconhecido."</string>
-<string name="download_manager_ERROR_UNHANDLED_HTTP_CODE">"Foi recebido um código HTTP que não pode ser manipulado. Este é um erro de servidor."</string>
-<string name="download_manager_ERROR_HTTP_DATA_ERROR">"Ocorreu um erro ao receber ou ao processar os dados."</string>
-<string name="download_manager_ERROR_TOO_MANY_REDIRECTS">"Demasiados redirecionamentos."</string>
-<string name="download_manager_ERROR_INSUFFICIENT_SPACE">"Espaço livre insuficiente."</string>
+    <string name="download_manager_ERROR_HTTP_DATA_ERROR">"Ocorreu um erro ao receber ou ao processar os dados."</string>
+    <string name="download_manager_ERROR_INSUFFICIENT_SPACE">"Espaço livre insuficiente."</string>
 <string name="download_manager_ERROR_DEVICE_NOT_FOUND">"Não foi detetado qualquer disco externo. O cartão SD está montado?"</string>
 <string name="download_manager_ERROR_CANNOT_RESUME">"Ocorreu algum erro e não é possível retomar a descarga. Tente mais tarde."</string>
-<string name="download_manager_ERROR_BLOCKED">"A descarga falhou porque NetworkPolicyManager controla a aplicação solicitante. Verifique as suas definições."</string>
-<string name="search_filter">"Todas as aplicações"</string>
+    <string name="search_filter">"Todas as aplicações"</string>
 <string name="pref_delete_apk_after_install_summary_off">"Agora, os ficheiros .apk não serão apagados"</string>
 <string name="pref_delete_apk_after_install_summary_on">"Agora, os ficheiros .apk serão apagados"</string>
 <string name="pref_delete_apk_after_install">"Apagar .apk após a instalação"</string>
@@ -131,7 +126,7 @@
 <string name="details_download_checking">"A verificar…"</string>
 <string name="details_download_not_available">"Indisponível"</string>
 <string name="manual_download_incompatible">"A Google Play acha que esta aplicação não é compatível com o seu dispositivo. Isto significa que o código da versão não foi devolvido pelo servidor da Google Play Store."</string>
-<string name="manual_download_compatible">"\"O campo do código da versão foi pré-preenchido com o correspondente ao da última versão compatível. Se quiser a versão anterior, introduza um número menor do que o atual. Se o programador da aplicação ainda não tiver removido a aplicação anterior da Play Store, poderá ainda efetuar a descarga."</string>
+<string name="manual_download_compatible">"O campo do código da versão foi pré-preenchido com o correspondente ao da última versão compatível. Se quiser a versão anterior, introduza um número menor do que o atual. Se o programador da aplicação ainda não tiver removido a aplicação anterior da Play Store, poderá ainda efetuar a descarga."</string>
 <string name="manual_download_warning">"Esta página deixa-lhe escolher a versão da aplicação que será descarregada. O código da versão é um número que identifica a versão da aplicação. Começa por 1 e é incrementado sempre que é disponibilizada uma nova versão. Por norma, a Play Store só lhe permite instalar a versão mais recente que seja compatível com o seu dispositivo. Ao escolher o número da versão, poderá ser possível descarregar outras versões. 
 
  
@@ -141,15 +136,12 @@
 <string name="details_uninstall">"Desinstalar"</string>
 <string name="notification_download_starting">"A iniciar descarga"</string>
 <string name="notification_download_progress">"Descarregada(s) \"%1$s de %2$s"</string>
-<string name="pref_requested_language">"Idioma dos pedidos �� Play Store"</string>
+<string name="pref_requested_language">"Idioma dos pedidos na Play Store"</string>
 <string name="pref_requested_language_default">"Idioma padrão"</string>
-<string name="pref_device_to_pretend_to_be">"Simular ser um dispositivo diferente"</string>
-<string name="pref_device_to_pretend_to_be_default">"Informação original do dispositivo"</string>
-<string name="pref_device_to_pretend_to_be_toast">"Esta alteração será aplicada na próxima sessão"</string>
-<string name="pref_category_updates">"Atualizações"</string>
+    <string name="pref_device_to_pretend_to_be_default">"Informação original do dispositivo"</string>
+    <string name="pref_category_updates">"Atualizações"</string>
 <string name="pref_category_installation">"Instalação"</string>
-<string name="pref_category_spoofing">"Disfarce"</string>
-<string name="pref_category_ui">"Interface"</string>
+    <string name="pref_category_ui">"Interface"</string>
 <string name="details_installing">"A instalar…"</string>
 <string name="details_installed">"Instalada com sucesso"</string>
 <string name="details_install_failure">"Instalação não efetuada"</string>
@@ -188,11 +180,11 @@
 
   
 
-  Tenha em atenção de que a conversão  de aplicações não é suportada pelos sistemas Android e é possível que esta operação não funcione.
+Tenha em atenção de que a conversão  de aplicações não é suportada pelos sistemas Android e é possível que esta operação não funcione.
 
   
 
-  Não o deve fazer por curiosidade e esta ação pode danificar o seu dispositivo. Crie um backup antes de experimentar."</string>
+Não o deve fazer por curiosidade e esta ação pode danificar o seu dispositivo. Crie um backup antes de experimentar."</string>
 <string name="dialog_message_system_app_warning_to_normal">"Optou por converter uma aplicação de sistema em aplicação normal. Algumas aplicações necessitam de ser aplicações de sistema para funcionar corretamente.
 
    
@@ -208,21 +200,19 @@
 
    
 
-   Tenha em atenção de que a remoção de aplicações de sistema não é suportada pelos sistemas Android e é possível que esta operação não funcione.
+Tenha em atenção de que a remoção de aplicações de sistema não é suportada pelos sistemas Android e é possível que esta operação não funcione.
 
    
-
-   Não o deve fazer por curiosidade e esta ação pode danificar o seu dispositivo. Crie um backup antes de experimentar."</string>
+Não o deve fazer por curiosidade e esta ação pode danificar o seu dispositivo. Crie um backup antes de experimentar."</string>
 <string name="dialog_title_system_app_self">"Tornar Yalp Store uma aplicação de sistema"</string>
 <string name="dialog_message_system_app_self">"Tem que tornar a Yalp Store em aplicação do sistema para poder atualizar as aplicações em segundo plano.
 
      
 
-    O processo não é infalível e depende do seu dispositivo. 
+O processo não é infalível e depende do seu dispositivo. 
 
      
-
-     Deseja experimentar?"</string>
+Deseja experimentar?"</string>
 <string name="about_website_label">"Site:"</string>
 <string name="details_share">"Partilhar"</string>
 <string name="details_developer">"Programador: %1$s"</string>
@@ -250,7 +240,7 @@
 <string name="testing_program_opt_in">"entrar"</string>
 <string name="testing_program_opt_out">"sair"</string>
 <string name="testing_program_section_opted_in_message">"As atualizações irão incluir versões beta. Se sair do programa beta, apenas receberá atualizações estáveis. "</string>
-<string name="testing_program_section_opted_in_propagating_message">"Dentro de alguns minutos entrará no programa beta. Depois,  já poderá instalar a versão beta disponível."</string>
+<string name="testing_program_section_opted_in_propagating_message">"Dentro de alguns minutos entrará no programa beta. Depois, já poderá instalar a versão beta disponível."</string>
 <string name="testing_program_section_opted_in_title">"Você é um testador Beta"</string>
 <string name="testing_program_section_opted_out_message">"Teste os novos recursos antes que se tornem públicos. Envie os seus comentários diretamente para o programador."</string>
 <string name="testing_program_section_opted_out_propagating_message">"Pode levar alguns minutos para sair do programa Beta."</string>
@@ -310,7 +300,7 @@
 <string name="pref_download_internal_storage_summary_off">"Os ficheiros apk serão colocados no caminho indicado abaixo"</string>
 <string name="pref_use_tor">"Utilizar Tor"</string>
 <string name="pref_use_tor_summary">"Descarregar aplicações através da rede Tor para manter a privacidade. Requer Orbot."</string>
-<string name="pref_category_proxy">"Proxy"</string>
+
 <string name="pref_proxy_enable">"Ativar proxy"</string>
 <string name="pref_proxy_type">"Tipo de proxy"</string>
 <string name="pref_proxy_host">"Servidor proxy"</string>
@@ -319,17 +309,32 @@
 <string name="action_wishlist_add">"Adicionar à lista de desejos"</string>
 <string name="action_wishlist">"Lista de desejos"</string>
 <string name="action_ignore_this">"Ignorar esta atualização"</string>
-<string name="details_exodus">"Privacidade de Exodus: %1$s"</string>
+<string name="details_exodus">"Privacidade Exodus: %1$s"</string>
 <string name="details_exodus_tap_to_check">"toque para verificar"</string>
 <string name="details_exodus_searching">"a procurar"</string>
 <string name="details_exodus_not_found">"não encontrada"</string>
-<string name="details_exodus_found">"%1$s trackers"</string>
+
 <string name="pref_category_third_party">"Serviços de terceiros"</string>
 <string name="pref_exodus">"Verificação da privacidade Exodus"</string>
 <string name="pref_exodus_summary_on">"O número de 'trackers' é mostrado na página de detalhes"</string>
 <string name="pref_exodus_summary_off">"A ligação do relatório Exodus é mostrada"</string>
 <string name="details_to_fdroid">"Ver em F-Droid"</string>
-<string name="details_instant_app">"App instantâneo"</string>
-<string name="details_exodus_submitting">"submitting"</string>
-<string name="details_exodus_view">"view report"</string>
+<string name="details_instant_app">"Aplicação instantânea"</string>
+<string name="details_exodus_submitting">"a submeter"</string>
+<string name="details_exodus_view">"ver relatório"</string>
+<string name="details_new_permission">"Novas:"</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<string name="action_history">"histórico"</string>
 </resources>

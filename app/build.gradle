@@ -1,40 +1,60 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
+    def getCurrentFlavor = { ->
+        if (getGradle().getStartParameter().getTaskRequests().toString().contains("legacy")) {
+            return "legacy"
+        } else {
+            return "contemporary"
+        }
+    }
     def getVersionName = { ->
         def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags'
-            standardOutput = stdout
+        try {
+            exec {
+                commandLine 'git', 'describe', '--tags'
+                standardOutput = stdout
+            }
+        } catch (Throwable e) {
+            println "Could not get git commit info for the version name: " + e.message
+            return "0." + (android.defaultConfig.versionCode > 1000 ? (android.defaultConfig.versionCode - 1000) : android.defaultConfig.versionCode) + "-nogit"
         }
         return stdout.toString().trim()
     }
     defaultConfig {
         applicationId "com.github.yeriomin.yalpstore"
         minSdkVersion 5
-        targetSdkVersion 27
-        versionCode 43
+        targetSdkVersion 28
+        versionCode 45
         versionName getVersionName()
         vectorDrawables.useSupportLibrary = true
         resConfigs "ar", "ast", "bg", "cs", "de", "el", "en", "es", "eu", "fr", "fr-rBE", "in", "it", "ja", "kk", "ko", "nl", "pl", "pt", "pt-rBR", "ru", "sk", "uk", "zh", "zh-rTW"
     }
     buildTypes {
+        debug {
+            versionNameSuffix "-debug"
+            applicationIdSuffix ".${getCurrentFlavor()}.debug"
+            resValue "string", "app_name", "Yalp ${getCurrentFlavor()} debug"
+        }
         release {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "app_name", "Yalp Store"
         }
     }
     flavorDimensions "minApi"
     productFlavors {
         legacy {
             dimension "minApi"
+            versionNameSuffix "-legacy"
         }
         contemporary {
             dimension "minApi"
+            versionNameSuffix "-contemporary"
             minSdkVersion 14
             versionCode (1000 + android.defaultConfig.versionCode)
         }
@@ -45,12 +65,12 @@ android {
 }
 
 dependencies {
-    implementation 'info.guardianproject.netcipher:netcipher:2.0.0-alpha1'
-    contemporaryImplementation 'com.android.support:design:27.1.1'
-    contemporaryImplementation 'com.android.support:appcompat-v7:27.1.1'
+    contemporaryImplementation 'com.android.support:design:28.0.0'
+    contemporaryImplementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'info.guardianproject.netcipher:netcipher:2.0.0-beta1'
     implementation 'commons-net:commons-net:3.5'
     implementation 'com.nothome:javaxdelta:2.0.1'
-    debugImplementation 'com.github.yeriomin:play-store-api:0.42'
-    releaseImplementation 'com.github.yeriomin:play-store-api:0.42'
+    debugImplementation ('com.github.yeriomin:play-store-api:master-SNAPSHOT') { changing = true }
+    releaseImplementation 'com.github.yeriomin:play-store-api:0.44.2'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201608240809'
 }

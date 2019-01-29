@@ -19,6 +19,7 @@
 
 package com.github.yeriomin.yalpstore;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.Locale;
@@ -28,8 +29,8 @@ public class SharedPreferencesTranslator {
     private static final String PREFIX = "translation";
     private SharedPreferences prefs;
 
-    public SharedPreferencesTranslator(SharedPreferences prefs) {
-        this.prefs = prefs;
+    public SharedPreferencesTranslator(Context context) {
+        this.prefs = context.getSharedPreferences(getClass().getName(), Context.MODE_PRIVATE);
     }
 
     public String getString(String id, Object... params) {

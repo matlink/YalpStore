@@ -21,20 +21,36 @@ package com.github.yeriomin.yalpstore.view;
 
 import android.view.View;
 
+import com.github.yeriomin.yalpstore.ContextUtil;
 import com.github.yeriomin.yalpstore.UpdatableAppsActivity;
 import com.github.yeriomin.yalpstore.YalpStoreApplication;
 import com.github.yeriomin.yalpstore.YalpStorePermissionManager;
+import com.github.yeriomin.yalpstore.download.DownloadManager;
 
 public class UpdatableAppsButtonAdapterAbstract extends ButtonAdapter {
+
 
     public UpdatableAppsButtonAdapterAbstract(View button) {
         super(button);
     }
 
     public UpdatableAppsButtonAdapterAbstract init(final UpdatableAppsActivity activity) {
+        if (((YalpStoreApplication) activity.getApplication()).isBackgroundUpdating()) {
+            setUpdating();
+        } else if (!activity.getListedPackageNames().isEmpty()) {
+            setReady();
+        } else {
+            hide();
+        }
+        return this;
+    }
+
+    public UpdatableAppsButtonAdapterAbstract setReady() {
+        show();
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                UpdatableAppsActivity activity = (UpdatableAppsActivity) ContextUtil.getActivity(v.getContext());
                 YalpStorePermissionManager permissionManager = new YalpStorePermissionManager(activity);
                 if (permissionManager.checkPermission()) {
                     activity.launchUpdateAll();
@@ -43,23 +59,21 @@ public class UpdatableAppsButtonAdapterAbstract extends ButtonAdapter {
                 }
             }
         });
-        if (((YalpStoreApplication) activity.getApplication()).isBackgroundUpdating()) {
-            setUpdating();
-        } else if (!activity.getListedPackageNames().isEmpty()) {
-            setReady();
-        }
-        return this;
-    }
-
-    public UpdatableAppsButtonAdapterAbstract setReady() {
-        show();
-        enable();
         return this;
     }
 
     public UpdatableAppsButtonAdapterAbstract setUpdating() {
         show();
-        disable();
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UpdatableAppsActivity activity = (UpdatableAppsActivity) ContextUtil.getActivity(v.getContext());
+                for (String packageName: activity.getListedPackageNames()) {
+                    new DownloadManager(activity).cancel(packageName);
+                    activity.getListItem(packageName).draw();
+                }
+            }
+        });
         return this;
     }
 }

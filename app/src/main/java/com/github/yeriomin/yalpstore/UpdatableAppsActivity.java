@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import com.github.yeriomin.yalpstore.download.DownloadManager;
 import com.github.yeriomin.yalpstore.model.App;
 import com.github.yeriomin.yalpstore.task.AppListValidityCheckTask;
 import com.github.yeriomin.yalpstore.task.playstore.ForegroundUpdatableAppsTask;
@@ -67,7 +68,6 @@ public class UpdatableAppsActivity extends AppListActivity {
         super.onNewIntent(intent);
 
         setIntent(intent);
-        loadApps();
     }
 
     @Override
@@ -128,6 +128,9 @@ public class UpdatableAppsActivity extends AppListActivity {
 
     public void launchUpdateAll() {
         ((YalpStoreApplication) getApplicationContext()).setBackgroundUpdating(true);
+        for (String packageName: getListedPackageNames()) {
+            DownloadManager.unsetCancelled(packageName);
+        }
         new UpdateChecker().onReceive(UpdatableAppsActivity.this, getIntent());
         new UpdatableAppsButtonAdapter(findViewById(R.id.main_button)).setUpdating();
     }
