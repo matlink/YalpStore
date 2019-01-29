@@ -21,10 +21,10 @@ package com.github.yeriomin.yalpstore.task;
 
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import com.github.yeriomin.yalpstore.R;
+import com.github.yeriomin.yalpstore.view.HttpTaskOnClickListener;
 import com.github.yeriomin.yalpstore.view.UriOnClickListener;
 
 import org.json.JSONArray;
@@ -95,12 +95,7 @@ public class ExodusSearchTask extends ExodusTask {
             updateTextView(new UriOnClickListener(viewRef.get().getContext(), LINK_WEB_REPORT + reportId + "/"), R.string.details_exodus_found, trackers);
         } else {
             updateTextView(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new ExodusCsrfTask((TextView) v, packageName).execute();
-                    }
-                },
+                new HttpTaskOnClickListener(new ExodusCsrfTask(viewRef.get(), packageName)),
                 R.string.details_exodus_view
             );
         }

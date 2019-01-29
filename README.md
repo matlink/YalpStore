@@ -15,7 +15,7 @@ To supplement the features related to Google Play, Yalp Store has ordinary packa
 
 If root is available, Yalp Store can update your apps in background, install and uninstall system apps.
 
-Yalp Store can be installed as a system app to gain background package installation permission. In ths case "Unknown sources" setting can be left off. You can let Yalp Store self-install as a system app, or get the OTA zip from the [releases page](https://github.com/yeriomin/YalpStore/releases).
+Yalp Store can be installed as a system app to gain background package installation permission. In this case, the "Unknown sources" setting can be left off. You can let Yalp Store self-install as a system app, or get the OTA zip from the [releases page](https://github.com/yeriomin/YalpStore/releases).
 
 ## Why would I use it?
 If you are content with Google Play Store app, you will not need this app.
@@ -40,17 +40,13 @@ When the GSF id is ready, your email and password (if you provided them) are use
 >
 >A: No. Only free apps and apps you have purchased are going to be accessible through Yalp Store. Google Play API is not open and is not documented, so Yalp Store is developed through reverse-engineering. To implement features related to anything that requires payment I would have to (very) frequently buy stuff from Google Play Store. 
 
->Q: Why isn't Yalp Store using Material Design? Is it going to?
->
->A: No. The priority for Yalp Store is backwards compatibility and size. It works on every android since Android 2.0 Eclair. Implementing Material Design would require adding a heavy dependency and a lot of purely-UI code.
-
 >Q: Even though I granted the write permission to Yalp Store, it still says "Downloads directory could not be created or is not writable." How do I download anything?
 >
 >A: Try force-closing Yalp Store and launching it again. If it doesn't help, read [this discussion](https://github.com/yeriomin/YalpStore/issues/308).
 
->Q: I cannot download files! Downloads start but do not progress or stop midway. / I'm having error 495. / I don't like Android built-in DownloadManager. Is Yalp going to have its own download manager?
+>Q: I cannot download files! Or Yalp Store says that there is no network connection.
 >
->A: Try turning off VPN or ad-blocking apps first. Yalp already **has** a mini download manager. It is used as a fallback when system DownloadManager is disabled or unavailable for any other reason. You can force Yalp to use the fallback download manager like this: Settings -> Apps -> Show system -> Download Manager -> Disable. Setting download location to internal storage also turns the fallback on. I'm not setting the fallback as default because it is very minimalisic and is never going to be as well-tested and feature-rich as the system DownloadManager.
+>A: Try turning off VPN or ad-blocking apps.
 
 >Q: Some apps are not getting the latest release available on Play Store. What do I do?
 >
@@ -58,7 +54,7 @@ When the GSF id is ready, your email and password (if you provided them) are use
 
 >Q: I would like to spoof device X. Can you add its definition to Yalp Store?
 >
->A: There is an extended library of devices [here](https://github.com/yeriomin/play-store-api/find/alldevices). If you found your device, put it into your downloads directory and it will appear in Yalp Store spoof device list. Note that the files are named by device codenames which might not be the same as the names with which the devices are sold, for example codename of Nexus 5X is bullhead. Also, the device definitions are simple text files, so if you know *exactly* what you need to spoof, you can just edit them by hand. Note that all the devices in the above mentioned list were submitted by users, so if you haven't found the device you wanted, you are out of luck. I cannot create a device definition on demand.
+>A: There is an extended library of devices [here](https://github.com/yeriomin/play-store-api/find/alldevices). If you found your device, put it into your downloads directory and it will appear in Yalp Store spoof device list. Note that the files are named by device codenames which might not be the same as the names with which the devices are sold, for example codename of Nexus 5X is bullhead. Also, the device definitions are simple text files, so if you know *exactly* what you need to spoof, you can just edit them by hand. Note that all the devices in the above mentioned list were submitted by users, so if you haven't found the device you wanted, you are out of luck. I cannot create a device definition on demand. 
 
 >Q: Can Yalp Store download region-locked apps?
 >
@@ -82,3 +78,4 @@ Yalp Store is Free Software: You can use, study share and improve it at your wil
 * [Apache Commons Net](https://commons.apache.org/proper/commons-net/) - used to send bug reports
 * [libsuperuser](https://github.com/Chainfire/libsuperuser) - used to work with root
 * [javaxdelta](https://sourceforge.net/projects/xdelta/) - used to work with delta updates
+* [NetCipher](https://github.com/guardianproject/NetCipher) - used to initiate secure network connections and work with proxies

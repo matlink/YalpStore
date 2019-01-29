@@ -44,7 +44,11 @@ public class DetailsTask extends PlayStorePayloadTask<App> {
 
     @Override
     protected void processIOException(IOException e) {
-        if (null != e && e instanceof GooglePlayException && ((GooglePlayException) e).getCode() == 404) {
+        if (null != e
+            && e instanceof GooglePlayException
+            && ((GooglePlayException) e).getCode() == 404
+            && YalpStoreApplication.isForeground()
+        ) {
             ContextUtil.toast(this.context, R.string.details_not_available_on_play_store);
         }
     }
@@ -60,8 +64,7 @@ public class DetailsTask extends PlayStorePayloadTask<App> {
             // App is not installed
         }
         if (YalpStoreApplication.installedPackages.containsKey(packageName)) {
-            app.getPackageInfo().versionCode = YalpStoreApplication.installedPackages.get(packageName).getVersionCode();
-            app.setInstalled(true);
+            app.setPackageInfo(YalpStoreApplication.installedPackages.get(packageName).getPackageInfo());
         }
         return app;
     }

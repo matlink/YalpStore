@@ -20,6 +20,10 @@
 package com.github.yeriomin.yalpstore;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.os.Build;
+import android.util.TypedValue;
 
 import java.io.Closeable;
 import java.io.File;
@@ -44,6 +48,23 @@ public class Util {
         siPrefixes.put(6, "M");
         siPrefixes.put(9, "G");
         siPrefixes.put(12, "T");
+    }
+
+    static public int getColor(Context context, int attrId) {
+        TypedValue outValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        boolean wasResolved = theme.resolveAttribute(attrId, outValue, true);
+        if (wasResolved) {
+            return outValue.resourceId == 0
+                ? outValue.data
+                : (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    ? context.getColor(outValue.resourceId)
+                    : context.getResources().getColor(outValue.resourceId)
+                )
+            ;
+        } else {
+            return Color.BLACK;
+        }
     }
 
     static public Map<String, String> sort(Map<String, String> unsorted) {
@@ -128,7 +149,7 @@ public class Util {
     static public byte[] getFileChecksum(File file) {
         MessageDigest md;
         try {
-            md = MessageDigest.getInstance("SHA-256");
+            md = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
             return null;
         }
@@ -146,5 +167,12 @@ public class Util {
             closeSilently(inputStream);
         }
         return md.digest();
+    }
+
+    public static byte[] base64StringToByteArray(String string) {
+        return com.github.yeriomin.playstoreapi.Base64.decode(
+            string,
+            com.github.yeriomin.playstoreapi.Base64.URL_SAFE | com.github.yeriomin.playstoreapi.Base64.NO_PADDING
+        );
     }
 }

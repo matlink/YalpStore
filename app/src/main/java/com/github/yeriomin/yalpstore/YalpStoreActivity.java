@@ -23,8 +23,10 @@ import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,25 +34,25 @@ import android.view.Window;
 import android.widget.EditText;
 
 import com.github.yeriomin.yalpstore.fragment.FilterMenu;
+import com.github.yeriomin.yalpstore.model.LoginInfo;
+import com.github.yeriomin.yalpstore.model.LoginInfoDao;
 import com.github.yeriomin.yalpstore.view.DialogWrapper;
 import com.github.yeriomin.yalpstore.view.DialogWrapperAbstract;
+import com.github.yeriomin.yalpstore.view.LoginDialogBuilder;
+
+import java.util.Collections;
+import java.util.List;
 
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
+import static com.github.yeriomin.yalpstore.PlayStoreApiAuthenticator.PREFERENCE_USER_ID;
 import static com.github.yeriomin.yalpstore.PreferenceUtil.PREFERENCE_USE_TOR;
 
 public abstract class YalpStoreActivity extends BaseActivity {
 
-    static protected boolean logout = false;
-
-    public static void cascadeFinish() {
-        YalpStoreActivity.logout = true;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.v(getClass().getSimpleName(), "Starting activity");
-        logout = false;
         if (((YalpStoreApplication) getApplication()).isTv()) {
             requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
         }
@@ -61,6 +63,7 @@ public abstract class YalpStoreActivity extends BaseActivity {
     @Override
     protected void onResume() {
         Log.v(getClass().getSimpleName(), "Resuming activity");
+        YalpStoreApplication.incrementActivityCount();
         super.onResume();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             invalidateOptionsMenu();
@@ -68,14 +71,12 @@ public abstract class YalpStoreActivity extends BaseActivity {
         if (PreferenceUtil.getBoolean(this, PREFERENCE_USE_TOR)) {
             OrbotHelper.requestStartTor(this);
         }
-        if (logout) {
-            finish();
-        }
     }
 
     @Override
     protected void onPause() {
         Log.v(getClass().getSimpleName(), "Pausing activity");
+        YalpStoreApplication.decrementActivityCount();
         super.onPause();
     }
 
@@ -124,6 +125,9 @@ public abstract class YalpStoreActivity extends BaseActivity {
             case R.id.action_wishlist:
                 startActivity(new Intent(this, WishlistActivity.class));
                 break;
+            case R.id.action_history:
+                startActivity(new Intent(this, HistoryActivity.class));
+                break;
             case R.id.filter_system_apps:
             case R.id.filter_apps_with_ads:
             case R.id.filter_paid_apps:
@@ -133,9 +137,73 @@ public abstract class YalpStoreActivity extends BaseActivity {
             case R.id.filter_downloads:
                 new FilterMenu(this).onOptionsItemSelected(item);
                 break;
+            case R.id.action_new_account:
+                new LoginDialogBuilder(this).show();
+                return true;
+            case R.id.action_accounts:
+                return true;
             default:
-                return super.onOptionsItemSelected(item);
+                if (item.getGroupId() != R.id.group_accounts) {
+                    return super.onOptionsItemSelected(item);
+                }
+                return switchAccount(item.getItemId());
         }
+        return true;
+    }
+
+    @Override
+    protected void fillAccountList(Menu menu, List<LoginInfo> users) {
+        menu.findItem(R.id.action_logout).setVisible(YalpStoreApplication.user.isLoggedIn());
+        if (null == users || users.isEmpty()) {
+            return;
+        }
+        Menu accountsMenu = null == menu.findItem(R.id.action_accounts).getSubMenu() ? menu : menu.findItem(R.id.action_accounts).getSubMenu();
+        for (LoginInfo info: users) {
+            String userName = TextUtils.isEmpty(info.getUserName())
+                ? (info.appProvidedEmail() ? getString(R.string.auth_built_in) : info.getEmail())
+                : info.getUserName()
+            ;
+            String deviceDefinitionDisplayName = "";
+            if (!TextUtils.isEmpty(info.getDeviceDefinitionName())) {
+                deviceDefinitionDisplayName = getString(R.string.bullet_divider) + info.getDeviceDefinitionDisplayName();
+                userName = userName.split(" ")[0];
+            }
+            MenuItem item = accountsMenu.add(
+                R.id.group_accounts,
+                info.hashCode(),
+                1,
+                userName + deviceDefinitionDisplayName
+            );
+            if (info.hashCode() == YalpStoreApplication.user.hashCode()) {
+                markCurrentAccount(item);
+            }
+        }
+    }
+
+    @Override
+    protected List<LoginInfo> getUsers() {
+        SQLiteDatabase db = new SqliteHelper(this).getReadableDatabase();
+        List<LoginInfo> users = new LoginInfoDao(db).getAll();
+        db.close();
+        Collections.sort(users);
+        return users;
+    }
+
+    private boolean switchAccount(int id) {
+        if (id == YalpStoreApplication.user.hashCode()) {
+            return false;
+        }
+        SQLiteDatabase db = new SqliteHelper(this).getReadableDatabase();
+        LoginInfo loginInfo = new LoginInfoDao(db).get(id);
+        db.close();
+        if (null == loginInfo) {
+            return false;
+        }
+        new PlayStoreApiAuthenticator(this).logout();
+        YalpStoreApplication.user = loginInfo;
+        PreferenceUtil.getDefaultSharedPreferences(this).edit().putInt(PREFERENCE_USER_ID, YalpStoreApplication.user.hashCode()).commit();
+        ((YalpStoreApplication) getApplicationContext()).initHttpCache();
+        redrawAccounts();
         return true;
     }
 
@@ -151,21 +219,31 @@ public abstract class YalpStoreActivity extends BaseActivity {
         }
     }
 
-    private DialogWrapperAbstract showLogOutDialog() {
-        return new DialogWrapper(this)
+    protected DialogWrapperAbstract showLogOutDialog() {
+        DialogWrapperAbstract dialogWrapper = new DialogWrapper(this)
             .setMessage(R.string.dialog_message_logout)
             .setTitle(R.string.dialog_title_logout)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     new PlayStoreApiAuthenticator(getApplicationContext()).logout();
+                    redrawAccounts();
                     dialogInterface.dismiss();
-                    finishAll();
                 }
             })
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
         ;
+        if (!YalpStoreApplication.user.appProvidedEmail() || !TextUtils.isEmpty(YalpStoreApplication.user.getDeviceDefinitionName())) {
+            dialogWrapper.setNeutralButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                    new PlayStoreApiAuthenticator(getApplicationContext()).logout(true);
+                    redrawAccounts();
+                    dialogInterface.dismiss();
+                }
+            });
+        }
+        return dialogWrapper.show();
     }
 
     private DialogWrapperAbstract showFallbackSearchDialog() {
@@ -184,10 +262,5 @@ public abstract class YalpStoreActivity extends BaseActivity {
             .setNegativeButton(android.R.string.cancel, null)
             .show()
         ;
-    }
-
-    protected void finishAll() {
-        logout = true;
-        finish();
     }
 }

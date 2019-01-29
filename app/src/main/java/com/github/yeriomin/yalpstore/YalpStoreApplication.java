@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.os.Handler;
@@ -34,8 +35,14 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.github.yeriomin.yalpstore.model.App;
+import com.github.yeriomin.yalpstore.model.LoginInfo;
+import com.github.yeriomin.yalpstore.model.LoginInfoDao;
+import com.github.yeriomin.yalpstore.notification.CancelDownloadReceiver;
+import com.github.yeriomin.yalpstore.notification.IgnoreUpdatesReceiver;
+import com.github.yeriomin.yalpstore.notification.SignatureCheckReceiver;
 import com.github.yeriomin.yalpstore.task.FdroidListTask;
 import com.github.yeriomin.yalpstore.task.InstalledAppsTask;
+import com.github.yeriomin.yalpstore.task.OldApkCleanupTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,11 +53,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import info.guardianproject.netcipher.NetCipher;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static com.github.yeriomin.yalpstore.InstalledAppsActivity.INSTALLED_APPS_LOADED_ACTION;
+import static com.github.yeriomin.yalpstore.PreferenceUtil.PREFERENCE_DOWNLOAD_INTERNAL_STORAGE;
 import static com.github.yeriomin.yalpstore.PreferenceUtil.PREFERENCE_USE_TOR;
 
 public class YalpStoreApplication extends Application {
@@ -59,9 +69,25 @@ public class YalpStoreApplication extends Application {
     public static final Set<String> fdroidPackageNames = new HashSet<>();
     public static final SharedPreferencesCachedSet wishlist = new SharedPreferencesCachedSet("wishlist");
 
+    public static LoginInfo user = new LoginInfo();
+
+    private static final AtomicInteger runningActivities = new AtomicInteger(0);
+
     private boolean isBackgroundUpdating = false;
     private List<String> pendingUpdates = new ArrayList<>();
     private ProxyOnChangeListener listener;
+
+    public static boolean isForeground() {
+        return runningActivities.get() > 0;
+    }
+
+    public static void incrementActivityCount() {
+        runningActivities.incrementAndGet();
+    }
+
+    public static void decrementActivityCount() {
+        runningActivities.decrementAndGet();
+    }
 
     public boolean isBackgroundUpdating() {
         return isBackgroundUpdating;
@@ -100,18 +126,16 @@ public class YalpStoreApplication extends Application {
     public void onCreate() {
         super.onCreate();
         if (!BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            try {
-                HttpResponseCache.install(new File(getCacheDir(), "http"), 5 * 1024 * 1024);
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), "Could not register cache " + e.getMessage());
-            }
+            initHttpCache();
         }
         PreferenceUtil.prefillInstallationMethod(this);
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
         initNetcipher();
+        initUser();
         Thread.setDefaultUncaughtExceptionHandler(new YalpStoreUncaughtExceptionHandler(getApplicationContext()));
-        registerDownloadReceiver();
         registerInstallReceiver();
+        registerConnectivityReceiver();
+        registerSecondaryDownloadReceivers();
         try {
             new FdroidListTask(this.getApplicationContext()).executeOnExecutorIfPossible();
         } catch (Throwable e) {
@@ -122,29 +146,65 @@ public class YalpStoreApplication extends Application {
         installedAppsTask.setContext(this.getApplicationContext());
         installedAppsTask.executeOnExecutorIfPossible();
         wishlist.setPreferences(PreferenceUtil.getDefaultSharedPreferences(this));
-    }
-
-    private void registerDownloadReceiver() {
-        HandlerThread handlerThread = new HandlerThread("handlerThread");
-        handlerThread.start();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadManagerInterface.ACTION_DOWNLOAD_CANCELLED);
-        filter.addAction(DownloadManagerInterface.ACTION_DOWNLOAD_COMPLETE);
-        registerReceiver(new GlobalDownloadReceiver(), filter, null, new Handler(handlerThread.getLooper()));
+        if (PreferenceUtil.getBoolean(this, PREFERENCE_DOWNLOAD_INTERNAL_STORAGE)) {
+            OldApkCleanupTask task = new OldApkCleanupTask(this);
+            task.setDeleteAll(true);
+            task.executeOnExecutorIfPossible();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public void initHttpCache() {
+        try {
+            if (null != HttpResponseCache.getInstalled()) {
+                HttpResponseCache.getInstalled().delete();
+            }
+            HttpResponseCache.install(new File(getCacheDir(), "http"), 5 * 1024 * 1024);
+        } catch (IOException e) {
+            Log.e(getClass().getSimpleName(), "Could not register cache " + e.getMessage());
+        }
+    }
+
     private void registerInstallReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addDataScheme("package");
         filter.addAction(Intent.ACTION_INSTALL_PACKAGE);
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
-        filter.addAction(GlobalInstallReceiver.ACTION_PACKAGE_REPLACED_NON_SYSTEM);
+        filter.addAction(
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH
+                ? Intent.ACTION_PACKAGE_FULLY_REMOVED
+                : Intent.ACTION_PACKAGE_REMOVED
+        );
         filter.addAction(GlobalInstallReceiver.ACTION_PACKAGE_INSTALLATION_FAILED);
-        registerReceiver(new GlobalInstallReceiver(), filter);
+        HandlerThread handlerThread = new HandlerThread("InstallReceiverThread");
+        handlerThread.start();
+        registerReceiver(new GlobalInstallReceiver(), filter, null, new Handler(handlerThread.getLooper()));
+    }
+
+    private void registerConnectivityReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(CONNECTIVITY_ACTION);
+        registerReceiver(new ConnectivityChangeReceiver(), filter);
+    }
+
+    private void registerSecondaryDownloadReceivers() {
+        registerReceiver(new CancelDownloadReceiver(), new IntentFilter(CancelDownloadReceiver.ACTION_CANCEL_DOWNLOAD));
+        registerReceiver(new SignatureCheckReceiver(), new IntentFilter(SignatureCheckReceiver.ACTION_CHECK_APK));
+        registerReceiver(new IgnoreUpdatesReceiver(), new IntentFilter(IgnoreUpdatesReceiver.ACTION_IGNORE_UPDATES));
+    }
+
+    private void initUser() {
+        int id = PreferenceUtil.getDefaultSharedPreferences(this).getInt(PlayStoreApiAuthenticator.PREFERENCE_USER_ID, 0);
+        Log.i(getClass().getSimpleName(), "Current user id is " + id);
+        if (id != 0) {
+            SQLiteDatabase db = new SqliteHelper(this).getReadableDatabase();
+            LoginInfo loginInfo = new LoginInfoDao(db).get(id);
+            db.close();
+            if (null != loginInfo) {
+                user = loginInfo;
+            }
+        }
     }
 
     public void initNetcipher() {

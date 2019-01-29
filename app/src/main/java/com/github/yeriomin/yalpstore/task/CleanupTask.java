@@ -20,14 +20,13 @@
 package com.github.yeriomin.yalpstore.task;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 
-abstract public class CleanupTask extends AsyncTask<Void, Void, Void> {
+abstract public class CleanupTask extends LowCpuIntensityTask<Void, Void, Void> {
 
-    protected WeakReference<Context> contextRef = new WeakReference<>(null);
+    protected WeakReference<Context> contextRef;
 
     public CleanupTask(Context context) {
         this.contextRef = new WeakReference<>(context);

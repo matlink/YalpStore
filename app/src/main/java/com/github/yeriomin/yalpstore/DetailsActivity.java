@@ -30,10 +30,13 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.github.yeriomin.playstoreapi.GooglePlayAPI;
 import com.github.yeriomin.playstoreapi.GooglePlayException;
+import com.github.yeriomin.playstoreapi.ReviewResponse;
+import com.github.yeriomin.yalpstore.download.DetailsProgressListener;
+import com.github.yeriomin.yalpstore.download.DownloadManager;
 import com.github.yeriomin.yalpstore.fragment.ButtonCancel;
 import com.github.yeriomin.yalpstore.fragment.ButtonDownload;
 import com.github.yeriomin.yalpstore.fragment.ButtonInstall;
@@ -42,12 +45,11 @@ import com.github.yeriomin.yalpstore.fragment.ButtonUninstall;
 import com.github.yeriomin.yalpstore.fragment.DownloadMenu;
 import com.github.yeriomin.yalpstore.fragment.details.AllFragments;
 import com.github.yeriomin.yalpstore.model.App;
+import com.github.yeriomin.yalpstore.model.ReviewBuilder;
 import com.github.yeriomin.yalpstore.task.playstore.CloneableTask;
 import com.github.yeriomin.yalpstore.task.playstore.DetailsTask;
 
 import java.io.IOException;
-
-import static com.github.yeriomin.yalpstore.task.playstore.PurchaseTask.UPDATE_INTERVAL;
 
 public class DetailsActivity extends YalpStoreActivity {
 
@@ -55,7 +57,6 @@ public class DetailsActivity extends YalpStoreActivity {
 
     static public App app;
 
-    protected DetailsDownloadReceiver downloadReceiver;
     protected DetailsInstallReceiver installReceiver;
 
     static public Intent getDetailsIntent(Context context, String packageName) {
@@ -92,7 +93,7 @@ public class DetailsActivity extends YalpStoreActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceivers();
+        unregisterInstallReceiver();
     }
 
     @Override
@@ -101,26 +102,25 @@ public class DetailsActivity extends YalpStoreActivity {
         super.onResume();
     }
 
-    protected void unregisterReceivers() {
-        unregisterReceiver(downloadReceiver);
-        downloadReceiver = null;
+    protected void unregisterInstallReceiver() {
         unregisterReceiver(installReceiver);
         installReceiver = null;
     }
 
-    protected void redrawButtons() {
-        unregisterReceivers();
+    public void redrawButtons() {
+        unregisterInstallReceiver();
         if (null == app) {
             return;
         }
-        downloadReceiver = new DetailsDownloadReceiver(this, app.getPackageName());
         installReceiver = new DetailsInstallReceiver(this, app.getPackageName());
         new ButtonUninstall(this, app).draw();
         new ButtonDownload(this, app).draw();
         new ButtonCancel(this, app).draw();
         new ButtonInstall(this, app).draw();
         new ButtonRun(this, app).draw();
-        new DownloadProgressBarUpdater(app.getPackageName(), (ProgressBar) findViewById(R.id.download_progress)).execute(UPDATE_INTERVAL);
+        if (DownloadManager.isRunning(app.getPackageName())) {
+            DownloadManager.addProgressListener(app.getPackageName(), new DetailsProgressListener(this));
+        }
     }
 
     @Override
@@ -179,7 +179,7 @@ public class DetailsActivity extends YalpStoreActivity {
     public void redrawDetails(App app) {
         setTitle(app.getDisplayName());
         new AllFragments(this, app).draw();
-        unregisterReceivers();
+        unregisterInstallReceiver();
         redrawButtons();
         new DownloadMenu(this, app).draw();
     }
@@ -197,6 +197,18 @@ public class DetailsActivity extends YalpStoreActivity {
             task.setPackageName(packageName);
             task.setProgressIndicator(progressIndicator);
             return task;
+        }
+
+        @Override
+        protected App getResult(GooglePlayAPI api, String... arguments) throws IOException {
+            App app = super.getResult(api, arguments);
+            if (null == app.getUserReview() && !YalpStoreApplication.user.appProvidedEmail()) {
+                ReviewResponse reviewResponse = api.getReview(app.getPackageName());
+                if (reviewResponse.hasGetResponse() && reviewResponse.getGetResponse().getReviewCount() == 1) {
+                    app.setUserReview(ReviewBuilder.build(reviewResponse.getGetResponse().getReview(0)));
+                }
+            }
+            return app;
         }
 
         @Override
